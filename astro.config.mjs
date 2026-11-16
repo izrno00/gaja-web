@@ -33,7 +33,8 @@ const variants = (file, weight) => [
 export default defineConfig({
 	// TODO: replace with the real domain once it is decided (PRD §13).
 	// Used for canonical URLs, Open Graph URLs and the sitemap.
-	site: 'https://example.com',
+	site: 'https://izrno00.github.io',
+	base: '/gaja-web',
 	integrations: [sitemap()],
 	fonts: [
 		{
