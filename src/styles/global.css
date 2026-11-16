@@ -93,6 +93,13 @@
 
 	/* Vertical padding of a standard content section. */
 	--section-padding-y: var(--space-24);
+	/* Spacing inside the one-screen home About + logos block. It scales with
+	   the viewport height: 16px on screens ~770px tall, ~42px at 900px, at most
+	   64px. Tuned so the block fits from ~768px tall viewports up (the About
+	   text column, ~521px, is the part that can't shrink).
+	   --screen-gap is the slightly larger gap between the logo title and logos. */
+	--screen-space: clamp(var(--space-4), calc(var(--space-5) + (100svh - 790px) / 5), var(--space-16));
+	--screen-gap: clamp(var(--space-6), calc(var(--screen-space) * 1.1), var(--space-12));
 
 	/* ---- Layout (PRD §4.4) ---- */
 	--container-max: 1140px;
@@ -115,6 +122,7 @@
 	--icon-md: 24px;
 	--logo-mark-size: 41px;
 	--fab-size: 56px;
+	--about-media-min: 320px; /* smallest height of the home About photo */
 	--logo-strip-height: 28px; /* partner logos (home "Tvrtke koje nam vjeruju") */
 
 	/* ---- Motion ---- */

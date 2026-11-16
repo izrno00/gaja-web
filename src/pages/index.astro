@@ -13,8 +13,32 @@ import Services from '../components/home/Services.astro';
 	<Hero />
 	<!-- Everything after the pinned hero slides over it (see .cover in global.css). -->
 	<div class="cover">
-		<About />
-		<Partners />
+		<!-- About + partner logos form one full screen (user decision). -->
+		<div class="intro-screen">
+			<About />
+			<Partners />
+		</div>
 		<Services />
 	</div>
 </BaseLayout>
+
+<style>
+	/* One screen: About + partner logos together fill exactly the viewport
+	   height. The top --header-height is left empty, because the fixed header
+	   slides in exactly when this block reaches the top of the viewport (the
+	   hero is then fully covered) and lies over it. So the content itself
+	   fits in 100svh − header. About takes all the free space (its photo
+	   scales with it); the logo strip sits at the bottom. If the content is
+	   taller than the screen (short laptops), the block grows instead of
+	   overflowing. */
+	.intro-screen {
+		display: grid;
+		/* minmax(0, …) so the logo marquee's long track can't widen the block */
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: 1fr auto;
+		min-height: 100vh; /* fallback for browsers without svh */
+		min-height: 100svh;
+		padding-top: var(--header-height);
+		background-color: var(--color-primary);
+	}
+</style>

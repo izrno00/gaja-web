@@ -67,23 +67,53 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - Gaps: eyebrow → H1 0 (eyebrow line height 17px), H1 → lead 8px, lead → buttons 36px, between buttons 20px.
   - H1 now uses the global type scale (3.815rem ≈ 61px, line height 1.2). `max-width: 10.8em` (the old 560px at 52px) keeps the break after "do"; checked at 1440px.
 
+### About + logos = one screen (home only): `.intro-screen` in `src/pages/index.astro`
+- **User decision:** when About is in view, the "Tvrtke koje nam vjeruju" strip below it must be fully visible too, as if they were one section.
+- `index.astro` wraps `<About />` and `<Partners />` in `<div class="intro-screen">` (scoped style in the page):
+  - grid with `grid-template-columns: minmax(0, 1fr)` (otherwise the marquee's long track widens the block to ~2600px) and `grid-template-rows: 1fr auto`
+  - `min-height: 100svh` (100vh fallback), `padding-top: var(--header-height)`
+- **Why the 101px top padding:** the fixed header slides in exactly when this block reaches the top of the viewport (the hero is then fully covered) and lies over the block's top 101px. So that strip is left empty, and the content fits into `100svh − header` (user picked "window minus header").
+- **About** takes all the free height (row `1fr`); **Partners** sits at the bottom (`auto`).
+  - On tall screens the photo grows up to the old 4:5 size, then the content stays centred.
+  - If the content can't fit (viewports shorter than ~768px), the block grows instead of overflowing.
+- **Spacing that scales with height** (tokens in `global.css`):
+  - `--screen-space` = `clamp(16px, 20px + (100svh − 790px) / 5, 64px)` → 16px at ~770px tall, ~42px at 900, 64px at ≥ 1010. It's used for About's top/bottom padding and Partners' padding above (after the divider) and below.
+  - `--screen-gap` = `clamp(24px, --screen-space × 1.1, 48px)`: the gap between the logo title and the logos.
+  - The ~521px About text column is the part that can't shrink, so the minimum fitting viewport is ~768px tall.
+- **Verified in Chrome with puppeteer** (scrolled so the block's top is at the top of the viewport, header `fixed`):
+
+  | Viewport | Block height | Logos fully visible | Photo |
+  |---|---|---|---|
+  | 1920×1080 | 1080 | yes | 522×618 |
+  | 1440×900 | 900 | yes | 522×528 |
+  | 1440×790 | 790 | yes | 522×528 |
+  | 1366×768 | 768 | yes | 522×522 |
+  | 1280×720 | 767 (+47px) | partly below the fold | 522×521 |
+
+  No horizontal scroll at any of these sizes.
+- **Reveal:** About and Partners keep their own `data-reveal`. Partners has `--reveal-delay: 120ms`, so it follows About (light stagger, user decision). No scroll snapping (user decision).
+
 ### O nama teaser (home only): `src/components/home/About.astro`
 - Built from the user's reference screenshot (a two-column "We're built for your business" block). The layout follows the reference; the decorations were adapted to the PRD.
-- `<section class="about">`, `--color-primary` background, `padding-block: var(--section-padding-y)` (96px). Measured 1440 × 845px at a 1440 viewport.
-- `.container` grid: two equal columns (`minmax(0, 1fr)` ×2), 96px gap (`--space-24`), `align-items: center`. Each column is 522px at 1440.
-- **Left column:** eyebrow "O nama" (`.eyebrow .eyebrow--accent`) → 16px → `h2` "Pouzdan partner za svaki prijevoz" (global h2 scale, Dark) → 40px → three points → 40px → `TextLink` "Više o nama →" to `/o-nama`.
-  - The points are a `<dl>`. Each point is a `<div>` holding a `dt` title (`--text-lg` 1.25rem, SemiBold) and a `dd` text (1rem, `--color-dark-80`, 4px below the title). There are 24px between points, and the list is at most 460px wide.
+- `<section class="about">`, `--color-primary` background, `padding-block: var(--screen-space)` (it shares one screen with the logos, see above).
+- `.container` grid: two equal columns (`minmax(0, 1fr)` ×2), 96px gap (`--space-24`), `align-items: center`, `height: 100%` (it fills the height `.intro-screen` gives About), `container-type: inline-size` (for the photo cap). Each column is 522px at 1440.
+- **Left column:** eyebrow "O nama" (`.eyebrow .eyebrow--accent`) → 16px → `h2` "Pouzdan partner za svaki prijevoz" (global h2 scale, Dark) → 32px → three points → 32px → `TextLink` "Više o nama →" to `/o-nama`. The 32px gaps were 40px before the one-screen change.
+  - The points are a `<dl>`. Each point is a `<div>` holding a `dt` title (`--text-lg` 1.25rem, SemiBold) and a `dd` text (1rem, `--color-dark-80`, 4px below the title). There are 16px between points (was 24px), and the list is at most 460px wide.
   - A `dl` rather than `h3`s, because the h3 size (2.441rem) is far too big for these titles (AGENTS.md rule 7).
 - **Right column:** the hero van photo (`hero-van.png`) as a **placeholder**, `<Image>` WebP with the same widths as the hero (960/1280/1667), so the browser reuses the same files. Lazy loaded.
-  - CSS crop: `aspect-ratio: 4 / 5`, `object-fit: cover`, `object-position: 90% center` (frames the van; it sits at x ≈ 830–1580 of 1667). The image is 522 × 653px at 1440.
+  - **The photo scales with the screen height (user decision):**
+    - It's wrapped in `.about__media` with `height: 100%` (the row height), `min-height: var(--about-media-min)` (320px) and `max-height: calc((100cqi − 96px) / 2 × 5/4)` (never taller than the old 4:5 portrait).
+    - The `<img>` is absolutely positioned (`inset: 0`, `object-fit: cover`, `object-position: 90% center`), so it never adds its own height to the row.
+    - At 1440×900 it is 522 × 528px (almost square); at 1920×1080 it is 522 × 618px.
   - Plain `--radius` corners, no shadow or offset block (user decision; the reference's big radius and shadow card were dropped).
 - The whole `.about__inner` block has `data-reveal`, so text and image fade up together.
 - Copy is in a `points` array in the component frontmatter.
 
 ### Partner logos "Tvrtke koje nam vjeruju" (home only): `src/components/home/Partners.astro`
 - Built from the user's reference ("Brands We Work With": a small centred title over one row of grey logos). Sits right after About.
-- `<section class="partners" aria-labelledby="partners-title">`, `--color-primary` background (it continues About), `padding-bottom: var(--section-padding-y)` and no top padding, because About's bottom padding already gives 96px above it.
-- Title: `<p>` (not a heading; an h2 would be far too big, AGENTS.md rule 7), `--text-lg` SemiBold, centred. 48px (`--space-12`) above the logos.
+- `<section class="partners" aria-labelledby="partners-title">`, `--color-primary` background (it continues About). It's the bottom part of the one-screen block (see "About + logos = one screen"). `padding-bottom: var(--screen-space)`.
+- `.partners__inner` (the container) has a 1px `--color-border` hairline on top (user decision) and `padding-top: var(--screen-space)`.
+- Title: `<p>` (not a heading; an h2 would be far too big, AGENTS.md rule 7), `--text-lg` SemiBold, centred. `--screen-gap` (24–48px, 46px at 900px tall) above the logos.
 - **Infinite marquee (user decision):**
   - The logo `<ul>` is rendered twice inside `.partners__track`. The second copy is `aria-hidden="true"` with `alt=""`.
   - The track animates `translateX(0 → -50%)` over `--duration-marquee` (40s), linear and infinite. Each list has `padding-right` equal to its gap, so the seam is spaced like every other logo.
@@ -95,7 +125,7 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - Each is a simple geometric mark plus an Arial/Helvetica wordmark. `textLength` fixes the text width, so it never clips whichever system font draws it.
   - They're rendered as plain `<img>` (imported for their URL, width and height), lazy loaded.
 - The whole container (title + strip) has `data-reveal`.
-- At 1440 the section measures 200px tall; one logo list is ~1306px wide (more than the 1140 container, so the loop never shows a gap).
+- At 1440×900 the section measures 187px tall; one logo list is ~1306px wide (more than the 1140 container, so the loop never shows a gap).
 
 ### Naše usluge (home only): `src/components/home/Services.astro`
 - Built from the user's reference ("Construction Services": a heading and a list card on the left, two photos plus the active service's text on the right).
@@ -154,7 +184,7 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 | `src/components/home/Partners.astro` | Home partner logo marquee "Tvrtke koje nam vjeruju" |
 | `src/components/home/Services.astro` | Home "Naše usluge": vertical service tabs + crossfading panels |
 | `src/assets/logos/*.svg` | 8 placeholder partner logos (fictional brands), to be replaced |
-| `src/pages/index.astro` | Home page: BaseLayout + Hero + `<div class="cover">` holding About, Partners, Services (and all future sections) |
+| `src/pages/index.astro` | Home page: BaseLayout + Hero + `<div class="cover">` holding `.intro-screen` (About + Partners as one screen), Services (and all future sections) |
 | `AGENTS.md` | Added rule 7: the typography scale (user decision) |
 | `src/assets/hero-van.png` | Hero photo (the user's original, renamed from "White Cargo Van at Warehouse Docks.png") |
 | `src/assets/gaja-logo.png` | "G" logo mark from Figma (41×41) |
@@ -191,6 +221,11 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - `--logo-strip-height` (28px)
   - `--duration-panel` (400ms): tab panel crossfade
   - `--duration-marquee` (40s): one loop of the logo strip
+- **Added for the one-screen About + logos block:**
+  - `--screen-space`: spacing that scales with viewport height, 16–64px
+  - `--screen-gap`: 24–48px
+  - `--about-media-min` (320px)
+  - See "About + logos = one screen".
 - **Icons added (Lucide v1.73):** `arrow-up-right`, `truck`, `sofa`, `warehouse`, `trees`, `sparkles`, `circle-plus`.
 - **`services` in `site.ts`** is now a list of `{ name, slug }`. The slug is the anchor id of each service on `/usluge`; **the Usluge page must use these ids** (`prijevoz-i-dostava`, `selidbe`, `skladistenje`, `uredenje-okolisa`, `ciscenje-prostora`, `dodatne-usluge`), because the home "Saznaj više" links point to them.
 - **Utilities added:** `.eyebrow--accent` (Accent eyebrow for light sections, where Light is too faint), `.text-small`.

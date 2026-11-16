@@ -47,7 +47,7 @@ const copies = [false, true];
 ---
 
 <section class="partners" aria-labelledby="partners-title">
-	<div class="container" data-reveal>
+	<div class="container partners__inner" data-reveal>
 		<p id="partners-title" class="partners__title">Tvrtke koje nam vjeruju</p>
 
 		<div class="partners__viewport">
@@ -77,10 +77,19 @@ const copies = [false, true];
 </section>
 
 <style>
+	/* The bottom part of the About screen (.intro-screen in index.astro):
+	   a hairline divider, then the title and the logo strip. */
 	.partners {
-		padding-bottom: var(--section-padding-y);
+		padding-bottom: var(--screen-space);
 		background-color: var(--color-primary);
 		color: var(--color-dark);
+	}
+
+	.partners__inner {
+		padding-top: var(--screen-space);
+		border-top: 1px solid var(--color-border);
+		/* reveals just after the About block (light stagger) */
+		--reveal-delay: 120ms;
 	}
 
 	.partners__title {
@@ -91,7 +100,7 @@ const copies = [false, true];
 	}
 
 	.partners__viewport {
-		margin-top: var(--space-12);
+		margin-top: var(--screen-gap);
 		overflow: hidden;
 		/* Soft fade at both edges, so logos slide in and out gently. */
 		mask-image: linear-gradient(
