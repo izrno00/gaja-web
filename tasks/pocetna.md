@@ -208,6 +208,11 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - a button without an icon gets the wider text-only padding automatically
   - the padding tokens are measured to the outer edge; the 2px border is subtracted in CSS
   - hover: primary darkens and the icon nudges 3px right; outline fills with primary and the label turns dark
+  - **Outline hover fix (user-reported blink in Chrome):**
+    - The fill still fades over `--duration-fast` (ease-in-out), but the label colour now **switches in one step at the midpoint** (`color 0s linear calc(var(--duration-fast) / 2)`).
+    - Before, both faded together and crossed the same grey halfway. Measured in Chrome with animations slowed 20×, label contrast dropped to ~1.9:1, so the text blinked on hover in and out and when the cursor crossed the edge. Now the worst frame is ~3.7:1.
+    - The photo around the button doesn't repaint (0 pixel change measured), so the hero didn't need changes.
+    - Don't put a normal colour fade back on this variant.
 - `Icon.astro`:
   - props: `name`, `size` (px, default 24), `strokeWidth` (default 2), `class`
   - icon entries can set their own `viewBox` (`arrow-right` is cropped to `4 4 16 16` so it fills its box like the Figma arrow)

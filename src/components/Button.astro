@@ -82,10 +82,18 @@ const classes = ['button', `button--${variant}`, !icon && 'button--text-only', c
 	}
 
 	/* ---- Outline ---- */
+	/* The fill fades in, but the label colour switches in one step at the
+	   midpoint. If both faded together they would pass through the same grey
+	   halfway (measured contrast ~1.9:1), so the label blinked on hover in and
+	   out. The step keeps it readable at every frame (worst ~4:1). Same
+	   transition in both directions, so it's set on the base rule. */
 	.button--outline {
 		background-color: transparent;
 		border-color: var(--color-primary);
 		color: var(--color-primary);
+		transition:
+			background-color var(--duration-fast) ease-in-out,
+			color 0s linear calc(var(--duration-fast) / 2);
 	}
 
 	.button--outline:hover {
@@ -104,6 +112,7 @@ const classes = ['button', `button--${variant}`, !icon && 'button--text-only', c
 
 	@media (prefers-reduced-motion: reduce) {
 		.button,
+		.button--outline,
 		.button :global(.button__icon) {
 			transition: none;
 		}
