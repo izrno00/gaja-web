@@ -1,0 +1,115 @@
+---
+/**
+ * Button (PRD §4.6). Renders <a> when `href` is set, otherwise <button>.
+ *
+ * Variants:
+ * - primary: accent fill, primary label (e.g. "Kontaktiraj nas")
+ * - outline: transparent, 2px primary border, for dark backgrounds (e.g. "Naše usluge")
+ *
+ * Text-only buttons get wider horizontal padding than buttons with an icon,
+ * matching the two buttons in Figma.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon, { type IconName } from './icons/Icon.astro';
+
+interface Props {
+	variant?: 'primary' | 'outline';
+	href?: string;
+	/** Optional icon shown after the label. */
+	icon?: IconName;
+	type?: 'button' | 'submit' | 'reset';
+	class?: string;
+	/** Extra attributes passed to the <a>/<button> (aria-*, data-*, target…). */
+	attrs?: HTMLAttributes<'a'> & HTMLAttributes<'button'>;
+}
+
+const { variant = 'primary', href, icon, type = 'button', class: className, attrs = {} } = Astro.props;
+
+const classes = ['button', `button--${variant}`, !icon && 'button--text-only', className];
+---
+
+{
+	href ? (
+		<a href={href} class:list={classes} {...attrs}>
+			<span class="button__label"><slot /></span>
+			{icon && <Icon name={icon} size={16} strokeWidth={1.5} class="button__icon" />}
+		</a>
+	) : (
+		<button type={type} class:list={classes} {...attrs}>
+			<span class="button__label"><slot /></span>
+			{icon && <Icon name={icon} size={16} strokeWidth={1.5} class="button__icon" />}
+		</button>
+	)
+}
+
+<style>
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--button-gap);
+		height: var(--button-height);
+		/* padding tokens are measured to the outer edge, so subtract the border */
+		padding-inline: calc(var(--button-padding-x) - var(--button-border));
+		border: var(--button-border) solid transparent;
+		border-radius: var(--radius);
+		font-family: var(--font-body);
+		font-size: var(--text-button);
+		font-weight: var(--weight-bold);
+		line-height: 1;
+		white-space: nowrap;
+		cursor: pointer;
+		transition:
+			background-color var(--duration-fast) ease,
+			border-color var(--duration-fast) ease,
+			color var(--duration-fast) ease;
+	}
+
+	.button--text-only {
+		padding-inline: calc(var(--button-padding-x-text) - var(--button-border));
+	}
+
+	/* ---- Primary ---- */
+	.button--primary {
+		background-color: var(--color-accent);
+		border-color: var(--color-accent);
+		color: var(--color-primary);
+	}
+
+	.button--primary:hover {
+		background-color: var(--color-accent-hover);
+		border-color: var(--color-accent-hover);
+	}
+
+	/* ---- Outline ---- */
+	.button--outline {
+		background-color: transparent;
+		border-color: var(--color-primary);
+		color: var(--color-primary);
+	}
+
+	.button--outline:hover {
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	/* ---- Icon nudge on hover ---- */
+	.button :global(.button__icon) {
+		transition: transform var(--duration-fast) ease;
+	}
+
+	.button:hover :global(.button__icon) {
+		transform: translateX(3px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.button,
+		.button :global(.button__icon) {
+			transition: none;
+		}
+
+		.button:hover :global(.button__icon) {
+			transform: none;
+		}
+	}
+</style>

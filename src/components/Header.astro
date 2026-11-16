@@ -1,0 +1,301 @@
+---
+/**
+ * Site header (PRD §5, §6.1): logo, main nav and the "Kontaktiraj nas" button.
+ *
+ * Scroll behaviour (script at the bottom):
+ * 1. scrollY = 0                → banner + header in normal flow, visible ("flow")
+ * 2. first scroll down           → banner + header fade + slide up together
+ *                                  ("flow-hidden"; the banner follows every
+ *                                  non-"flow" state via its data-hidden attribute)
+ * 3. top section scrolled past   → header becomes fixed and slides down ("fixed")
+ *    (with a pinned hero: once the content sliding over it covers it fully)
+ * 4. scroll back into top section→ fixed header slides away ("fixed-hidden"),
+ *                                  then quietly returns to flow ("flow-hidden")
+ * The top section is the element marked `data-top-section` on each page
+ * (the hero on Početna). The 101px slot keeps the layout from jumping.
+ *
+ * Kontakt link vs "Kontaktiraj nas" button (user decision): the in-flow
+ * header (shown with the banner, over the top section) has a plain "Kontakt"
+ * nav link and no button. The fixed header (after the top section) swaps that
+ * link for the "Kontaktiraj nas" button. Pure CSS on `data-state`; the swap
+ * always happens while the header is hidden, so it's never seen. Without JS
+ * the state stays "flow", so the Kontakt link shows.
+ */
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import { navItems } from '../data/site';
+import logoMark from '../assets/gaja-logo.png';
+
+const normalize = (path: string) => (path.length > 1 ? path.replace(/\/+$/, '') : path);
+const currentPath = normalize(Astro.url.pathname);
+const contactHref = '/kontakt';
+---
+
+<div class="header-slot">
+	<header class="header" data-header data-state="flow">
+		<div class="container header__inner">
+			<a class="logo" href="/" aria-label="GAJA TRANS – početna stranica">
+				<Image src={logoMark} alt="" width={41} height={41} class="logo__mark" loading="eager" />
+				<span class="logo__text" aria-hidden="true">aja trans</span>
+			</a>
+
+			<div class="header__end">
+				<nav class="nav" aria-label="Glavna navigacija">
+					<ul class="nav__list" role="list">
+						{
+							navItems.map((item) => (
+								<li class:list={{ 'nav__item--contact': item.href === contactHref }}>
+									<a
+										class="nav__link"
+										href={item.href}
+										aria-current={normalize(item.href) === currentPath ? 'page' : undefined}
+									>
+										{item.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</nav>
+				<Button href={contactHref} icon="arrow-right" class="header__cta">Kontaktiraj nas</Button>
+			</div>
+		</div>
+	</header>
+</div>
+
+<style>
+	/* Reserves the header's height so content never jumps when it turns fixed. */
+	.header-slot {
+		height: var(--header-height);
+	}
+
+	.header {
+		position: relative;
+		z-index: var(--z-header);
+		height: var(--header-height);
+		background-color: var(--color-primary);
+		transition:
+			transform var(--duration-header) ease,
+			opacity var(--duration-header) ease,
+			box-shadow var(--duration-header) ease,
+			visibility 0s linear 0s;
+	}
+
+	/* ---- Scroll states (set by the script below) ---- */
+	.header[data-state='flow-hidden'],
+	.header[data-state='fixed-hidden'] {
+		opacity: 0;
+		transform: translateY(-100%);
+		visibility: hidden;
+		/* hide from keyboard only after the fade-out has finished */
+		transition-property: transform, opacity, box-shadow, visibility;
+		transition-delay: 0s, 0s, 0s, var(--duration-header);
+	}
+
+	/* In flow, the header slides up by banner + header height, the same distance
+	   as the banner, so both move off-screen as one block. */
+	.header[data-state='flow-hidden'] {
+		transform: translateY(calc(-1 * var(--site-top-height)));
+	}
+
+	.header[data-state='fixed'],
+	.header[data-state='fixed-hidden'] {
+		position: fixed;
+		inset: 0 0 auto;
+	}
+
+	.header[data-state='fixed'] {
+		box-shadow: 0 2px 16px var(--color-shadow);
+	}
+
+	/* Used for instant (invisible) state switches, e.g. flow ↔ fixed while hidden. */
+	.header[data-instant] {
+		transition: none;
+	}
+
+	/* ---- Layout ---- */
+	.header__inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-8);
+		height: 100%;
+	}
+
+	.header__end {
+		display: flex;
+		align-items: center;
+		gap: var(--space-8);
+	}
+
+	/* In flow (with the banner): "Kontakt" link, no button.
+	   Fixed (after the top section): the button replaces the link. */
+	.header:not([data-state^='fixed']) :global(.header__cta),
+	.header[data-state^='fixed'] .nav__item--contact {
+		display: none;
+	}
+
+	/* ---- Logo (PRD §4.7) ---- */
+	.logo {
+		display: inline-flex;
+		align-items: center;
+		color: var(--color-dark);
+	}
+
+	.logo :global(.logo__mark) {
+		width: var(--logo-mark-size);
+		height: var(--logo-mark-size);
+	}
+
+	.logo__text {
+		font-family: var(--font-logo);
+		font-size: var(--text-logo);
+		font-weight: 400;
+		line-height: normal;
+	}
+
+	/* ---- Nav ---- */
+	.nav__list {
+		display: flex;
+		align-items: center;
+		gap: var(--space-8);
+	}
+
+	.nav__link {
+		position: relative;
+		display: inline-block;
+		font-size: var(--text-nav);
+		font-weight: var(--weight-medium);
+		line-height: 1;
+		color: var(--color-dark);
+	}
+
+	/* 1px underline in the link colour: slides in on hover, always shown on
+	   the current page. */
+	.nav__link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -2px;
+		height: 1px;
+		background-color: currentColor;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform var(--duration-fast) ease;
+	}
+
+	.nav__link:hover::after,
+	.nav__link[aria-current='page']::after {
+		transform: scaleX(1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.header,
+		.nav__link::after {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	type HeaderState = 'flow' | 'flow-hidden' | 'fixed' | 'fixed-hidden';
+
+	const header = document.querySelector<HTMLElement>('[data-header]');
+	const slot = header?.parentElement;
+
+	if (header && slot) {
+		const topSection = document.querySelector<HTMLElement>('[data-top-section]') ?? slot;
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+		// 1px sentinel at the very top of the page: out of view as soon as scrollY > 0.
+		const sentinel = document.createElement('div');
+		sentinel.setAttribute('aria-hidden', 'true');
+		sentinel.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none;';
+		document.body.prepend(sentinel);
+
+		// The banner is visible only in the "flow" state (very top of the page),
+		// so it hides and returns together with the in-flow header but never
+		// comes back with the fixed one.
+		const banner = document.querySelector<HTMLElement>('[data-banner]');
+
+		let atTop = window.scrollY <= 0;
+		let pastTop = false;
+
+		const getState = () => header.dataset.state as HeaderState;
+
+		const setState = (state: HeaderState) => {
+			header.dataset.state = state;
+			banner?.toggleAttribute('data-hidden', state !== 'flow');
+		};
+
+		/** Switch state without animating (used only while the header is invisible). */
+		const setInstant = (state: HeaderState) => {
+			header.setAttribute('data-instant', '');
+			setState(state);
+			void header.offsetHeight; // force reflow so the switch isn't animated
+			header.removeAttribute('data-instant');
+		};
+
+		const update = () => {
+			const state = getState();
+
+			if (pastTop) {
+				// Make it fixed while still hidden, then slide it in on the next frame.
+				if (state === 'fixed') return;
+				if (state !== 'fixed-hidden') setInstant('fixed-hidden');
+				requestAnimationFrame(() => {
+					if (pastTop) setState('fixed');
+				});
+				return;
+			}
+
+			if (atTop) {
+				// Back at the very top: original layout returns.
+				if (state === 'fixed' || state === 'fixed-hidden') setInstant('flow-hidden');
+				requestAnimationFrame(() => {
+					if (atTop && !pastTop) setState('flow');
+				});
+				return;
+			}
+
+			// Somewhere inside the top section, not at the very top: header hidden.
+			if (state === 'flow') setState('flow-hidden');
+			if (state === 'fixed') setState('fixed-hidden');
+		};
+
+		// Once a fixed header has slid out, put it back into the flow (invisibly).
+		header.addEventListener('transitionend', (event) => {
+			if (event.target === header && event.propertyName === 'transform' && getState() === 'fixed-hidden' && !pastTop) {
+				setInstant('flow-hidden');
+			}
+		});
+		// With reduced motion there is no transitionend, so handle it directly.
+		const settle = () => {
+			if (reduceMotion.matches && getState() === 'fixed-hidden' && !pastTop) setInstant('flow-hidden');
+		};
+
+		new IntersectionObserver(([entry]) => {
+			atTop = entry.isIntersecting;
+			update();
+			settle();
+		}).observe(sentinel);
+
+		// "Past the top section" is detected with a 1px marker placed right after
+		// the top section in the flow, not with the section itself. A pinned
+		// (sticky) hero never leaves the viewport, but the marker sits where the
+		// content that covers it begins, so it crosses the top of the screen
+		// exactly when the hero is fully covered. For a normal top section this
+		// is the same as "its bottom edge has scrolled past".
+		const endMarker = document.createElement('div');
+		endMarker.setAttribute('aria-hidden', 'true');
+		endMarker.style.cssText = 'height:1px;margin-bottom:-1px;pointer-events:none;';
+		topSection.after(endMarker);
+
+		new IntersectionObserver(([entry]) => {
+			pastTop = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0;
+			update();
+			settle();
+		}).observe(endMarker);
+	}
+</script>

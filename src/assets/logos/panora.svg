@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 32" width="115" height="32" fill="#0a1428">
+  <!-- Placeholder logo (fictional brand) – replace with the real client logo. -->
+  <path d="M2 22a14 14 0 0 1 28 0Z"/><rect x="2" y="26" width="28" height="4" rx="1"/>
+  <text x="44" y="23.5" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" textLength="69" lengthAdjust="spacing">Panora</text>
+</svg>

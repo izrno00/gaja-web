@@ -1,0 +1,105 @@
+---
+/**
+ * Dark top contact bar (PRD §5). Phone + email on the left, address on the
+ * right. Only visible at the top of the page. On the first scroll it fades and
+ * slides up together with the header, and it comes back only at scrollY = 0,
+ * never with the fixed header. The header script toggles `data-hidden` here
+ * (see Header.astro).
+ */
+import Icon from './icons/Icon.astro';
+import { site } from '../data/site';
+---
+
+<div class="banner" data-banner>
+	<div class="container banner__inner">
+		<ul class="banner__group" role="list">
+			<li>
+				<a class="banner__link" href={site.phone.href}>
+					<Icon name="phone" strokeWidth={1.5} class="banner__icon" />
+					<span>{site.phone.display}</span>
+				</a>
+			</li>
+			<li>
+				<a class="banner__link" href={`mailto:${site.email}`}>
+					<Icon name="mail" strokeWidth={1.5} class="banner__icon" />
+					<span>{site.email}</span>
+				</a>
+			</li>
+		</ul>
+		<a class="banner__link" href={site.address.mapsUrl} target="_blank" rel="noopener">
+			<Icon name="map-pin" strokeWidth={1.5} class="banner__icon" />
+			<span>{site.address.full}</span>
+			<span class="visually-hidden"> (otvara Google karte u novoj kartici)</span>
+		</a>
+	</div>
+</div>
+
+<style>
+	.banner {
+		--focus-color: var(--color-light);
+		background-color: var(--color-dark);
+		color: var(--color-primary);
+	}
+
+	.banner__inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-10);
+		height: var(--banner-height);
+	}
+
+	.banner__group {
+		display: flex;
+		align-items: center;
+		gap: var(--space-10);
+	}
+
+	/* Flex items so the list items don't add line-height and shift the links. */
+	.banner__group li {
+		display: flex;
+	}
+
+	.banner__link {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		font-size: var(--text-banner);
+		font-weight: var(--weight-semibold);
+		line-height: 1;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.banner__link:hover {
+		color: var(--color-light);
+	}
+
+	.banner__link :global(.banner__icon) {
+		color: var(--color-light);
+	}
+
+	/* Layered above the hero photo, which extends up behind the banner. */
+	.banner {
+		position: relative;
+		z-index: var(--z-header);
+		transition:
+			transform var(--duration-header) ease,
+			opacity var(--duration-header) ease,
+			visibility 0s linear 0s;
+	}
+
+	/* Hidden together with the header: it moves up by the same distance as the
+	   in-flow header (banner + header height), so the two slide as one block. */
+	.banner[data-hidden] {
+		opacity: 0;
+		transform: translateY(calc(-1 * var(--site-top-height)));
+		visibility: hidden;
+		transition-delay: 0s, 0s, var(--duration-header);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.banner {
+			transition: none;
+		}
+	}
+</style>

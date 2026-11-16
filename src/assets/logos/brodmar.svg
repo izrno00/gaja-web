@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 32" width="126" height="32" fill="#0a1428">
+  <!-- Placeholder logo (fictional brand) – replace with the real client logo. -->
+  <path d="M16 1 29 8.5v15L16 31 3 23.5v-15Z"/><path d="M10 13h12M10 19h12" stroke="#ebedf5" stroke-width="3"/>
+  <text x="44" y="23.5" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" textLength="80" lengthAdjust="spacing">Brodmar</text>
+</svg>

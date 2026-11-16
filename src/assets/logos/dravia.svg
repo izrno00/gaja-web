@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 32" width="115" height="32" fill="#0a1428">
+  <!-- Placeholder logo (fictional brand) – replace with the real client logo. -->
+  <path d="M2 10q7-7 14 0t14 0M2 17q7-7 14 0t14 0M2 24q7-7 14 0t14 0" fill="none" stroke="#0a1428" stroke-width="3.2" stroke-linecap="round"/>
+  <text x="44" y="23.5" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" textLength="69" lengthAdjust="spacing">Dravia</text>
+</svg>

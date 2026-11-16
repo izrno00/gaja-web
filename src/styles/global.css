@@ -1,0 +1,308 @@
+/* ==========================================================================
+   GAJA TRANS – global tokens, reset, base styles and utilities
+   Every colour, font, radius and spacing value used in components must come
+   from a custom property defined here (PRD §4).
+   ========================================================================== */
+
+:root {
+	/* ---- Palette: the only 4 base colours (PRD §4.1) ---- */
+	--color-primary: #ebedf5;
+	--color-light: #9db3ff;
+	--color-accent: #4f72ea;
+	--color-dark: #0a1428;
+
+	/* ---- Derived variants (opacity / mixes of the palette only) ----
+	   Hover colours are provisional; the client will revise them (PRD §13). */
+	--color-primary-80: rgb(235 237 245 / 0.8); /* hero lead text */
+	--color-dark-80: rgb(10 20 40 / 0.8); /* body text on light sections */
+	--color-accent-hover: color-mix(in srgb, var(--color-accent) 85%, var(--color-dark));
+	--color-overlay-start: rgb(10 20 40 / 0.84);
+	--color-overlay-mid: rgb(10 20 40 / 0.78);
+	--color-overlay-end: rgb(10 20 40 / 0.55);
+	--color-shadow: rgb(10 20 40 / 0.18);
+	--color-shadow-cover: rgb(10 20 40 / 0.5); /* cast onto the dark hero */
+	/* Slightly darker Primary for tinted sections, so Primary cards stand out
+	   on it (replaces the white-card-on-grey look of references). */
+	--color-primary-shade: color-mix(in srgb, var(--color-primary) 94%, var(--color-dark));
+	--color-border: rgb(10 20 40 / 0.1); /* hairline dividers on light surfaces */
+	/* Partner logos: muted at rest, full on hover (user decision). */
+	--opacity-logo: 0.45;
+
+	/* ---- Brand exception: WhatsApp button only ----
+	   The user asked for the real WhatsApp look (green circle, white glyph).
+	   This overrides PRD §4.1/§4.3 for this one component; don't reuse these
+	   tokens anywhere else. */
+	--color-whatsapp: #25d366;
+	--color-whatsapp-hover: color-mix(in srgb, var(--color-whatsapp) 85%, var(--color-dark));
+	--color-whatsapp-icon: #fff;
+
+	/* Focus ring colour. Overridden to --color-light inside dark areas. */
+	--focus-color: var(--color-accent);
+
+	/* ---- Fonts (self-hosted via the Astro Fonts API, see astro.config.mjs) ---- */
+	--font-body: var(--font-poppins);
+	--font-logo: var(--font-noticia-text);
+
+	--weight-medium: 500;
+	--weight-semibold: 600;
+	--weight-bold: 700;
+
+	/* ---- Type scale (user decision, see AGENTS.md rule 7) ----
+	   Ratio 1.25 on a 1rem base. Headings get these sizes globally (see Base). */
+	--text-h1: 3.815rem; /* ~61px */
+	--leading-h1: 1.2;
+	--text-h2: 3.052rem; /* ~49px */
+	--leading-h2: 1.2;
+	--text-h3: 2.441rem; /* ~39px, only if needed */
+	--leading-h3: 1.25;
+	--text-lg: 1.25rem; /* small in-component titles that aren't headings */
+	--leading-lg: 1.4;
+	--text-body: 1rem;
+	--leading-body: 1.6;
+	--text-small: 0.8rem;
+
+	/* ---- UI text sizes, measured from Figma at 1440px (PRD §4.2) ---- */
+	--text-eyebrow: var(--text-small); /* 12.8px (Figma: 13px) */
+	--leading-eyebrow: 17px;
+	--tracking-eyebrow: 0.04em;
+	--text-lead: 18px;
+	--leading-lead: 1.5;
+	--text-nav: 18px;
+	--text-button: 18px;
+	--text-banner: 16px;
+	--text-logo: 40px;
+
+	/* ---- Radius (PRD §4.3) ---- */
+	--radius: 4px;
+	--radius-round: 50%; /* WhatsApp button only (user decision) */
+
+	/* ---- Spacing scale ---- */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-9: 36px;
+	--space-10: 40px;
+	--space-12: 48px;
+	--space-16: 64px;
+	--space-24: 96px;
+	--space-30: 120px;
+
+	/* Vertical padding of a standard content section. */
+	--section-padding-y: var(--space-24);
+
+	/* ---- Layout (PRD §4.4) ---- */
+	--container-max: 1140px;
+	--container-gutter: var(--space-6);
+	--banner-height: 52px;
+	--header-height: 101px;
+	--site-top-height: calc(var(--banner-height) + var(--header-height)); /* 153px */
+	/* Banner + header + hero fill exactly one viewport (user decision, replaces
+	   Figma's fixed 720px). */
+	--hero-height: calc(100svh - var(--site-top-height));
+	--hero-min-height: 600px; /* keeps the content from being clipped on short screens */
+
+	/* ---- Components ---- */
+	--button-height: 52px;
+	--button-padding-x: var(--space-5); /* buttons with an icon */
+	--button-padding-x-text: 35px; /* text-only buttons ("Naše usluge" in Figma) */
+	--button-gap: var(--space-2);
+	--button-border: 2px;
+	--icon-sm: 16px;
+	--icon-md: 24px;
+	--logo-mark-size: 41px;
+	--fab-size: 56px;
+	--logo-strip-height: 28px; /* partner logos (home "Tvrtke koje nam vjeruju") */
+
+	/* ---- Motion ---- */
+	--duration-fast: 200ms;
+	--duration-header: 350ms;
+	--duration-reveal: 600ms;
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--reveal-distance: 28px;
+	--duration-panel: 400ms; /* tab panel crossfade (home services) */
+	--duration-marquee: 40s; /* one full loop of the partner logo strip */
+
+	/* ---- Layers ---- */
+	--z-header: 100;
+	--z-fab: 90;
+	--z-skip-link: 200;
+}
+
+/* ==========================================================================
+   Reset
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+body {
+	min-height: 100vh;
+	background-color: var(--color-primary);
+	color: var(--color-dark);
+	font-family: var(--font-body);
+	font-size: var(--text-body);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-body);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+ul[role='list'],
+ol[role='list'] {
+	list-style: none;
+	padding: 0;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	text-wrap: balance;
+}
+
+/* Heading scale (AGENTS.md rule 7). Components set colour, not size. */
+h1 {
+	font-size: var(--text-h1);
+	line-height: var(--leading-h1);
+	font-weight: var(--weight-bold);
+}
+
+h2 {
+	font-size: var(--text-h2);
+	line-height: var(--leading-h2);
+	font-weight: var(--weight-semibold);
+}
+
+h3 {
+	font-size: var(--text-h3);
+	line-height: var(--leading-h3);
+	font-weight: var(--weight-semibold);
+}
+
+:focus-visible {
+	outline: 2px solid var(--focus-color);
+	outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* Shared 1140px content wrapper (PRD §4.4). */
+.container {
+	width: min(100% - 2 * var(--container-gutter), var(--container-max));
+	margin-inline: auto;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Wraps all page content after a pinned (sticky) hero, so it slides up over
+   the hero and covers it. Opaque, layered above the hero, with a soft shadow
+   cast up onto the hero from its top edge. */
+.cover {
+	position: relative;
+	z-index: 1;
+	background-color: var(--color-primary);
+	box-shadow: 0 -12px 32px var(--color-shadow-cover);
+}
+
+/* ---- Typography utilities (reuse these in later sections) ---- */
+.eyebrow {
+	font-size: var(--text-eyebrow);
+	line-height: var(--leading-eyebrow);
+	font-weight: var(--weight-bold);
+	letter-spacing: var(--tracking-eyebrow);
+	text-transform: uppercase;
+	color: var(--color-light);
+}
+
+/* On light sections the Light colour is too faint, so use Accent. */
+.eyebrow--accent {
+	color: var(--color-accent);
+}
+
+/* Smaller paragraph text (0.8rem). */
+.text-small {
+	font-size: var(--text-small);
+}
+
+/* Highlighted words in headings (light colour + underline). */
+.highlight {
+	color: var(--color-light);
+	text-decoration-line: underline;
+	text-decoration-thickness: from-font;
+	text-underline-position: from-font;
+}
+
+/* ==========================================================================
+   Reveal on scroll (PRD §6.2)
+   Hidden styles only apply when JS has added `.js` to <html>, so content stays
+   visible without JS. The observer lives in BaseLayout.astro.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+	.js [data-reveal] {
+		opacity: 0;
+		transform: translateY(var(--reveal-distance));
+		transition:
+			opacity var(--duration-reveal) var(--ease-out),
+			transform var(--duration-reveal) var(--ease-out);
+		transition-delay: var(--reveal-delay, 0ms);
+	}
+
+	.js [data-reveal].is-revealed {
+		opacity: 1;
+		transform: none;
+	}
+}

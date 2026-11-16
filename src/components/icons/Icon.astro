@@ -1,0 +1,114 @@
+---
+/**
+ * Inline SVG icon (PRD §3). Colour comes from `currentColor`, size from the
+ * `size` prop (px) or from CSS on the parent.
+ *
+ * Sources:
+ * - phone, mail, map-pin, arrow-right, arrow-up-right, truck, sofa,
+ *   warehouse, trees, sparkles, circle-plus: Lucide v1.73 (ISC licence)
+ * - whatsapp: Simple Icons v16 (CC0)
+ *
+ * To add an icon, add an entry to `icons` below.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+/** `viewBox` defaults to "0 0 24 24"; a tighter one makes the glyph fill its box. */
+type IconDef = { type: 'stroke' | 'fill'; body: string; viewBox?: string };
+
+const icons = {
+	phone: {
+		type: 'stroke',
+		body: '<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>',
+	},
+	mail: {
+		type: 'stroke',
+		body: '<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>',
+	},
+	'map-pin': {
+		type: 'stroke',
+		body: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+	},
+	'arrow-right': {
+		type: 'stroke',
+		// Cropped so the arrow spans the full 16px box like the Figma "next" icon.
+		viewBox: '4 4 16 16',
+		body: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+	},
+	'arrow-up-right': {
+		type: 'stroke',
+		body: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+	},
+	// Service icons (home "Naše usluge" list), Lucide v1.73.
+	truck: {
+		type: 'stroke',
+		body: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+	},
+	sofa: {
+		type: 'stroke',
+		body: '<path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/>',
+	},
+	warehouse: {
+		type: 'stroke',
+		body: '<path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11"/><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"/><path d="M6 13h12"/><path d="M6 17h12"/>',
+	},
+	trees: {
+		type: 'stroke',
+		body: '<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/>',
+	},
+	sparkles: {
+		type: 'stroke',
+		body: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
+	},
+	'circle-plus': {
+		type: 'stroke',
+		body: '<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>',
+	},
+	whatsapp: {
+		type: 'fill',
+		body: '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>',
+	},
+} satisfies Record<string, IconDef>;
+
+export type IconName = keyof typeof icons;
+
+interface Props {
+	name: IconName;
+	/** Width and height in px. */
+	size?: number;
+	/** Lucide stroke width (stroke icons only). */
+	strokeWidth?: number;
+	class?: string;
+}
+
+const { name, size = 24, strokeWidth = 2, class: className } = Astro.props;
+const icon: IconDef = icons[name];
+
+const paintAttrs: HTMLAttributes<'svg'> =
+	icon.type === 'stroke'
+		? {
+				fill: 'none',
+				stroke: 'currentColor',
+				'stroke-width': strokeWidth,
+				'stroke-linecap': 'round',
+				'stroke-linejoin': 'round',
+			}
+		: { fill: 'currentColor' };
+---
+
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	width={size}
+	height={size}
+	viewBox={icon.viewBox ?? '0 0 24 24'}
+	aria-hidden="true"
+	focusable="false"
+	class:list={['icon', className]}
+	{...paintAttrs}
+	set:html={icon.body}
+/>
+
+<style>
+	.icon {
+		flex-shrink: 0;
+	}
+</style>

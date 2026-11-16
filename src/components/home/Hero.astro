@@ -1,0 +1,141 @@
+---
+/**
+ * Home hero (Figma node 55:4 / 55:5). Full-bleed photo with the dark gradient
+ * overlay, content vertically centred in the 1140px container.
+ *
+ * This is the page's "top section" for the header scroll behaviour
+ * (data-top-section), and its content fades up on load (data-reveal).
+ */
+import { Image } from 'astro:assets';
+import Button from '../Button.astro';
+import heroImage from '../../assets/hero-van.png';
+---
+
+<section class="hero" data-top-section aria-labelledby="hero-title">
+	<Image
+		src={heroImage}
+		alt="Bijeli dostavni kombi parkiran ispred utovarnih rampi skladišta"
+		widths={[960, 1280, heroImage.width]}
+		sizes="100vw"
+		format="webp"
+		loading="eager"
+		fetchpriority="high"
+		class="hero__image"
+	/>
+	<div class="hero__overlay" aria-hidden="true"></div>
+
+	<div class="container hero__inner">
+		<div class="hero__content" data-reveal>
+			<p class="eyebrow">Prijevoz • Dostava • Selidbe</p>
+			<h1 id="hero-title" class="hero__title">
+				Od malih pošiljki do <span class="highlight">kompletnih selidbi</span>
+			</h1>
+			<p class="hero__lead">
+				Pouzdan prijevoz, dostava i selidbe diljem Hrvatske – sigurno, na vrijeme i bez stresa.
+			</p>
+			<div class="hero__actions">
+				<Button href="/kontakt" icon="arrow-right">Kontaktiraj nas</Button>
+				<Button href="/usluge" variant="outline">Naše usluge</Button>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	// The pinned hero can be covered by the `.cover` content sliding over it. If
+	// keyboard focus lands on a hidden hero link (e.g. Shift+Tab back up),
+	// scroll to the top so the focused element is actually visible.
+	const hero = document.querySelector<HTMLElement>('.hero');
+	const cover = document.querySelector<HTMLElement>('.cover');
+	if (hero && cover) {
+		hero.addEventListener('focusin', () => {
+			const covered = cover.getBoundingClientRect().top < hero.getBoundingClientRect().bottom;
+			if (covered) window.scrollTo({ top: 0 });
+		});
+	}
+</script>
+
+<style>
+	/* Pinned "curtain" hero (user decision): it never moves while the page
+	   scrolls; the content after it (the `.cover` wrapper in index.astro)
+	   slides up over it and covers it. Sticky to <main>, so it stays pinned
+	   under the whole page.
+	   `top` keeps it exactly where it sits at scrollY = 0 (below the banner +
+	   header). On screens shorter than banner + header + min-height, it first
+	   scrolls up just enough to show its bottom edge, then pins. */
+	.hero {
+		--focus-color: var(--color-light);
+		position: sticky;
+		top: min(var(--site-top-height), 100vh - var(--hero-min-height)); /* fallback without svh */
+		top: min(var(--site-top-height), 100svh - var(--hero-min-height));
+		isolation: isolate;
+		height: calc(100vh - var(--site-top-height)); /* fallback for browsers without svh */
+		height: var(--hero-height);
+		min-height: var(--hero-min-height);
+		/* Clip the sides and bottom, but let the photo and overlay show above
+		   the hero, behind the banner and header. When those slide away on the
+		   first scroll, the photo fills their space instead of a blank strip. */
+		clip-path: inset(calc(-1 * var(--site-top-height)) 0 0 0);
+		background-color: var(--color-dark);
+	}
+
+	/* The photo is laid out as a full-viewport background that starts at the
+	   very top of the page (behind the banner and header, which cover its top
+	   153px). Cover-cropped evenly from top and bottom and anchored right, so the
+	   van stays fully visible and sits at the same screen position whether or not
+	   the banner and header are showing. */
+	.hero :global(.hero__image) {
+		position: absolute;
+		top: calc(-1 * var(--site-top-height));
+		left: 0;
+		z-index: -2;
+		width: 100%;
+		height: calc(100% + var(--site-top-height));
+		object-fit: cover;
+		object-position: right center;
+	}
+
+	/* Starts 153px above the hero, like the photo, so the area behind the
+	   banner and header is darkened the same way. */
+	.hero__overlay {
+		position: absolute;
+		inset: calc(-1 * var(--site-top-height)) 0 0;
+		z-index: -1;
+		background-image: linear-gradient(
+			90deg,
+			var(--color-overlay-start) 0%,
+			var(--color-overlay-mid) 50%,
+			var(--color-overlay-end) 100%
+		);
+	}
+
+	.hero__inner {
+		display: flex;
+		align-items: center;
+		height: 100%;
+	}
+
+	.hero__title {
+		/* Size comes from the global h1 scale. max-width in em (was 560px at
+		   52px) so the line still breaks after "do" at the new size. */
+		max-width: 10.8em;
+		color: var(--color-primary);
+		text-wrap: wrap; /* keep Figma's break after "do" (global h1 uses balance) */
+	}
+
+	.hero__lead {
+		max-width: 500px;
+		margin-top: var(--space-2);
+		font-size: var(--text-lead);
+		line-height: var(--leading-lead);
+		font-weight: var(--weight-medium);
+		color: var(--color-primary-80);
+	}
+
+	.hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-5);
+		margin-top: var(--space-9);
+	}
+</style>

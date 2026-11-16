@@ -1,16 +1,20 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import About from '../components/home/About.astro';
+import Partners from '../components/home/Partners.astro';
+import Services from '../components/home/Services.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+	title="GAJA TRANS – prijevoz, dostava i selidbe diljem Hrvatske"
+	description="GAJA TRANS iz Višnjevca nudi pouzdan prijevoz, dostavu i selidbe diljem Hrvatske – od malih pošiljki do kompletnih selidbi. Sigurno, na vrijeme i bez stresa."
+>
+	<Hero />
+	<!-- Everything after the pinned hero slides over it (see .cover in global.css). -->
+	<div class="cover">
+		<About />
+		<Partners />
+		<Services />
+	</div>
+</BaseLayout>

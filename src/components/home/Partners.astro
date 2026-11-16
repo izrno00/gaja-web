@@ -1,0 +1,170 @@
+---
+/**
+ * Home "Tvrtke koje nam vjeruju" partner logo strip (user reference:
+ * "Brands We Work With"). An endless marquee: the logo list is rendered twice
+ * in one track and the track slides left by exactly one list (-50%), so the
+ * loop is seamless. It pauses on hover. With prefers-reduced-motion the copy
+ * is hidden and the logos sit still in a centred, wrapping row.
+ *
+ * Logos are muted (grayscale + --opacity-logo) and turn full on hover, so
+ * real coloured client logos will match the palette too. Not links (user
+ * decision).
+ *
+ * The logos are PLACEHOLDERS (fictional brands). To use real ones: put the
+ * files (SVG preferred, or PNG) in src/assets/logos/ and edit `logos` below.
+ * Keep at least ~8 logos so one list is wider than the container; otherwise
+ * a gap shows in the loop.
+ */
+import type { ImageMetadata } from 'astro';
+import kvadra from '../../assets/logos/kvadra.svg';
+import sjever from '../../assets/logos/sjever.svg';
+import dravia from '../../assets/logos/dravia.svg';
+import lumio from '../../assets/logos/lumio.svg';
+import orbis from '../../assets/logos/orbis.svg';
+import brodmar from '../../assets/logos/brodmar.svg';
+import ventis from '../../assets/logos/ventis.svg';
+import panora from '../../assets/logos/panora.svg';
+
+interface Logo {
+	name: string;
+	src: ImageMetadata;
+}
+
+const logos: Logo[] = [
+	{ name: 'Kvadra', src: kvadra },
+	{ name: 'Sjever', src: sjever },
+	{ name: 'Dravia', src: dravia },
+	{ name: 'Lumio', src: lumio },
+	{ name: 'Orbis', src: orbis },
+	{ name: 'Brodmar', src: brodmar },
+	{ name: 'Ventis', src: ventis },
+	{ name: 'Panora', src: panora },
+];
+
+// Rendered twice: the second copy only exists for the seamless loop, so it
+// is hidden from assistive tech.
+const copies = [false, true];
+---
+
+<section class="partners" aria-labelledby="partners-title">
+	<div class="container" data-reveal>
+		<p id="partners-title" class="partners__title">Tvrtke koje nam vjeruju</p>
+
+		<div class="partners__viewport">
+			<div class="partners__track">
+				{
+					copies.map((isCopy) => (
+						<ul class="partners__list" role="list" aria-hidden={isCopy ? 'true' : undefined}>
+							{logos.map((logo) => (
+								<li class="partners__item">
+									<img
+										src={logo.src.src}
+										width={logo.src.width}
+										height={logo.src.height}
+										alt={isCopy ? '' : logo.name}
+										loading="lazy"
+										decoding="async"
+										class="partners__logo"
+									/>
+								</li>
+							))}
+						</ul>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.partners {
+		padding-bottom: var(--section-padding-y);
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.partners__title {
+		font-size: var(--text-lg);
+		line-height: var(--leading-lg);
+		font-weight: var(--weight-semibold);
+		text-align: center;
+	}
+
+	.partners__viewport {
+		margin-top: var(--space-12);
+		overflow: hidden;
+		/* Soft fade at both edges, so logos slide in and out gently. */
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			var(--color-dark) 12%,
+			var(--color-dark) 88%,
+			transparent
+		);
+	}
+
+	.partners__track {
+		display: flex;
+		width: max-content;
+		animation: partners-marquee var(--duration-marquee) linear infinite;
+	}
+
+	.partners__viewport:hover .partners__track {
+		animation-play-state: paused;
+	}
+
+	/* Trailing padding = the gap, so the seam between the two copies is
+	   spaced like every other pair of logos. */
+	.partners__list {
+		display: flex;
+		align-items: center;
+		gap: var(--space-16);
+		padding-right: var(--space-16);
+	}
+
+	.partners__logo {
+		width: auto;
+		height: var(--logo-strip-height);
+		filter: grayscale(1);
+		opacity: var(--opacity-logo);
+		transition: opacity var(--duration-fast) ease;
+	}
+
+	.partners__logo:hover {
+		opacity: 1;
+	}
+
+	@keyframes partners-marquee {
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	/* No movement: one still, centred row of logos. */
+	@media (prefers-reduced-motion: reduce) {
+		.partners__viewport {
+			mask-image: none;
+		}
+
+		.partners__track {
+			width: auto;
+			animation: none;
+		}
+
+		.partners__list {
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: var(--space-8) var(--space-10); /* fits 8 logos in one row at 1140px */
+			width: 100%;
+			padding-right: 0;
+		}
+
+		.partners__list[aria-hidden='true'] {
+			display: none;
+		}
+
+		.partners__logo {
+			transition: none;
+		}
+	}
+</style>

@@ -1,0 +1,159 @@
+---
+/**
+ * Base layout for every page (PRD §5): <html lang="hr">, SEO meta, fonts,
+ * global styles, skip link, banner, header, <main>, WhatsApp button and the
+ * shared reveal-on-scroll script.
+ *
+ * Usage:
+ *   <BaseLayout title="…" description="…">
+ *     <Hero />            ← mark the page's top section with data-top-section
+ *     …
+ *   </BaseLayout>
+ *
+ * Add `data-reveal` to any block that should fade up once when it enters the
+ * viewport. For a light stagger, set `--reveal-delay` on siblings in CSS.
+ */
+import '../styles/global.css';
+import { Font, getImage } from 'astro:assets';
+import Banner from '../components/Banner.astro';
+import Header from '../components/Header.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { site } from '../data/site';
+import defaultOgSource from '../assets/hero-van.png';
+
+interface Props {
+	/** Page title. The site name is appended unless it is the home page. */
+	title: string;
+	description: string;
+	/** Absolute or root-relative URL of the social share image. */
+	ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+
+const siteUrl = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, siteUrl).href;
+
+const defaultOg = await getImage({ src: defaultOgSource, width: 1200, format: 'jpg' });
+const ogImageUrl = new URL(ogImage ?? defaultOg.src, siteUrl).href;
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'MovingCompany',
+	name: site.legalName,
+	url: siteUrl.href,
+	telephone: site.phone.international,
+	email: site.email,
+	taxID: site.oib,
+	image: ogImageUrl,
+	address: {
+		'@type': 'PostalAddress',
+		streetAddress: site.address.street,
+		postalCode: site.address.postalCode,
+		addressLocality: site.address.city,
+		addressCountry: site.address.country,
+	},
+	areaServed: 'HR',
+};
+---
+
+<!doctype html>
+<html lang="hr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+
+		<!-- Enables reveal animations only when JS runs (PRD §6.2). -->
+		<script is:inline>
+			document.documentElement.classList.add('js');
+		</script>
+
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+
+		<!-- Open Graph / Twitter -->
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="hr_HR" />
+		<meta property="og:site_name" content={site.name} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageUrl} />
+
+		<link rel="sitemap" href="/sitemap-index.xml" />
+
+		<Font cssVariable="--font-poppins" preload={[{ weight: 500 }, { weight: 700 }]} />
+		<Font cssVariable="--font-noticia-text" />
+
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+	</head>
+	<body>
+		<a class="skip-link" href="#sadrzaj">Preskoči na sadržaj</a>
+
+		<Banner />
+		<Header />
+
+		<main id="sadrzaj" tabindex="-1">
+			<slot />
+		</main>
+
+		<!-- Footer: designed later from the user's reference (PRD §5). -->
+
+		<WhatsAppButton />
+
+		<script>
+			// Shared reveal-on-scroll (PRD §6.2): each [data-reveal] block fades up once.
+			const blocks = document.querySelectorAll<HTMLElement>('[data-reveal]');
+			const reveal = (el: Element) => el.classList.add('is-revealed');
+
+			if (!('IntersectionObserver' in window)) {
+				blocks.forEach(reveal);
+			} else {
+				const observer = new IntersectionObserver(
+					(entries) => {
+						for (const entry of entries) {
+							if (!entry.isIntersecting) continue;
+							reveal(entry.target);
+							observer.unobserve(entry.target);
+						}
+					},
+					{ rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+				);
+				blocks.forEach((el) => observer.observe(el));
+			}
+		</script>
+	</body>
+</html>
+
+<style>
+	.skip-link {
+		position: fixed;
+		top: var(--space-4);
+		left: var(--space-4);
+		z-index: var(--z-skip-link);
+		padding: var(--space-3) var(--space-5);
+		border-radius: var(--radius);
+		background-color: var(--color-accent);
+		color: var(--color-primary);
+		font-weight: var(--weight-bold);
+		transform: translateY(calc(-100% - var(--space-6)));
+	}
+
+	.skip-link:focus {
+		transform: none;
+		outline-color: var(--color-dark);
+	}
+
+	main:focus {
+		outline: none;
+	}
+</style>

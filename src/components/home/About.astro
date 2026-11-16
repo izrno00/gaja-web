@@ -1,0 +1,112 @@
+---
+/**
+ * Home "O nama" teaser (user reference: "We're built for your business").
+ * Two columns: text left (eyebrow, h2, three points, link to /o-nama),
+ * portrait 4:5 image right. The whole block fades up together (data-reveal).
+ *
+ * The image is a placeholder: the hero van photo, cropped with CSS to frame
+ * the van. Swap `aboutImage` for the client's photo later and adjust
+ * `object-position` in the styles.
+ */
+import { Image } from 'astro:assets';
+import TextLink from '../TextLink.astro';
+import aboutImage from '../../assets/hero-van.png';
+
+// Placeholder copy (needs client approval).
+const points = [
+	{
+		title: 'Jedan poziv, sve usluge',
+		text: 'Prijevoz, selidbe, skladištenje, uređenje okoliša i čišćenje – sve rješavate s jednim timom i jednim kontaktom.',
+	},
+	{
+		title: 'Pouzdano i na vrijeme',
+		text: 'Dogovoreni termin za nas je obećanje. Dolazimo kad smo rekli i javljamo vam se u svakom koraku.',
+	},
+	{
+		title: 'Pažljivo s vašim stvarima',
+		text: 'Vaše stvari pakiramo, osiguravamo i prevozimo kao da su naše – bez oštećenja i bez stresa.',
+	},
+];
+---
+
+<section class="about" aria-labelledby="about-title">
+	<div class="container about__inner" data-reveal>
+		<div class="about__content">
+			<p class="eyebrow eyebrow--accent">O nama</p>
+			<h2 id="about-title" class="about__title">Pouzdan partner za svaki prijevoz</h2>
+
+			<dl class="about__points">
+				{
+					points.map((point) => (
+						<div class="about__point">
+							<dt class="about__point-title">{point.title}</dt>
+							<dd class="about__point-text">{point.text}</dd>
+						</div>
+					))
+				}
+			</dl>
+
+			<TextLink href="/o-nama" class="about__link">Više o nama</TextLink>
+		</div>
+
+		<Image
+			src={aboutImage}
+			alt="Bijeli dostavni kombi ispred skladišta"
+			widths={[960, 1280, aboutImage.width]}
+			sizes="(min-width: 1188px) 1160px, 100vw"
+			format="webp"
+			class="about__image"
+		/>
+	</div>
+</section>
+
+<style>
+	.about {
+		padding-block: var(--section-padding-y);
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.about__inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		align-items: center;
+		gap: var(--space-24);
+	}
+
+	.about__title {
+		margin-top: var(--space-4);
+	}
+
+	.about__points {
+		display: grid;
+		gap: var(--space-6);
+		max-width: 460px;
+		margin-top: var(--space-10);
+	}
+
+	.about__point-title {
+		font-size: var(--text-lg);
+		line-height: var(--leading-lg);
+		font-weight: var(--weight-semibold);
+	}
+
+	.about__point-text {
+		margin-top: var(--space-1);
+		color: var(--color-dark-80);
+	}
+
+	.about__content :global(.about__link) {
+		margin-top: var(--space-10);
+	}
+
+	/* Portrait crop of the landscape photo; 90% keeps the van centred. */
+	.about :global(.about__image) {
+		width: 100%;
+		aspect-ratio: 4 / 5;
+		height: auto;
+		object-fit: cover;
+		object-position: 90% center;
+		border-radius: var(--radius);
+	}
+</style>

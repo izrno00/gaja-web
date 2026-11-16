@@ -1,0 +1,50 @@
+---
+/**
+ * Floating WhatsApp button, bottom-right on every page (PRD §5).
+ *
+ * Deliberate exception to the palette/radius rules (user decision): it uses
+ * the real WhatsApp look, a green circle with a white glyph. The colours are the
+ * `--color-whatsapp*` tokens in global.css.
+ */
+import Icon from './icons/Icon.astro';
+import { site } from '../data/site';
+---
+
+<a class="whatsapp" href={site.whatsapp} target="_blank" rel="noopener" aria-label="Pišite nam na WhatsApp">
+	<Icon name="whatsapp" size={32} />
+</a>
+
+<style>
+	.whatsapp {
+		position: fixed;
+		right: var(--space-6);
+		bottom: var(--space-6);
+		z-index: var(--z-fab);
+		display: grid;
+		place-items: center;
+		width: var(--fab-size);
+		height: var(--fab-size);
+		border-radius: var(--radius-round);
+		background-color: var(--color-whatsapp);
+		color: var(--color-whatsapp-icon);
+		box-shadow: 0 4px 16px var(--color-shadow);
+		transition:
+			background-color var(--duration-fast) ease,
+			transform var(--duration-fast) ease;
+	}
+
+	.whatsapp:hover {
+		background-color: var(--color-whatsapp-hover);
+		transform: translateY(-2px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.whatsapp {
+			transition: none;
+		}
+
+		.whatsapp:hover {
+			transform: none;
+		}
+	}
+</style>
