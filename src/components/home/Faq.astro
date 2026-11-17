@@ -1,0 +1,257 @@
+---
+/**
+ * Home "Česta pitanja" (FAQ) section (user reference: a centred "FAQ"
+ * heading over a narrow list of questions with dotted dividers and a
+ * chevron, plus "Can't find your answer here? Get in touch." below).
+ *
+ * Built on native <details>/<summary>, so it works without JS (all closed,
+ * one open at a time through the shared `name`). The script enhances it:
+ * the answer slides open/closed (height animation) and opening one question
+ * closes the open one, also animated. Reduced motion: native, instant toggle.
+ *
+ * Also outputs FAQPage JSON-LD for search engines.
+ *
+ * Copy is PLACEHOLDER (needs client approval), price questions first
+ * (user decision).
+ */
+import Icon from '../icons/Icon.astro';
+import TextLink from '../TextLink.astro';
+
+interface Question {
+	question: string;
+	answer: string;
+}
+
+const questions: Question[] = [
+	{
+		question: 'Kako se formira cijena usluge?',
+		answer:
+			'Cijena ovisi o vrsti usluge, udaljenosti, količini stvari i broju ljudi koji su potrebni za posao. Nakon kratkog razgovora ili nekoliko fotografija pošaljemo vam točnu ponudu, bez skrivenih troškova.',
+	},
+	{
+		question: 'Je li procjena troškova besplatna?',
+		answer:
+			'Da. Ponuda je besplatna i ni na što vas ne obvezuje. Javite nam se telefonom, putem WhatsAppa ili kontakt obrasca i odgovorit ćemo vam u najkraćem roku.',
+	},
+	{
+		question: 'Kako mogu platiti uslugu?',
+		answer:
+			'Uslugu možete platiti gotovinom ili uplatom na račun. Tvrtkama izdajemo račun s njihovim podacima, a način plaćanja dogovaramo unaprijed, zajedno s ponudom.',
+	},
+	{
+		question: 'Radite li i izvan Osijeka i okolice?',
+		answer:
+			'Da. Prijevoz, dostavu i selidbe obavljamo diljem Hrvatske. Za duže relacije termin i cijenu dogovaramo unaprijed kako bi sve proteklo bez iznenađenja.',
+	},
+	{
+		question: 'Koliko unaprijed trebam rezervirati termin?',
+		answer:
+			'Za selidbe preporučujemo da nam se javite barem tjedan dana ranije, osobito krajem mjeseca. Manje prijevoze i dostave često možemo odraditi već za dan ili dva.',
+	},
+	{
+		question: 'Pakirate li stvari i rastavljate namještaj?',
+		answer:
+			'Da, na vaš zahtjev. Stvari pažljivo pakiramo, namještaj rastavljamo i na novoj adresi ponovno slažemo, a osjetljive predmete štitimo dekama i folijom.',
+	},
+	{
+		question: 'Mogu li uz selidbu dogovoriti i čišćenje ili skladištenje?',
+		answer:
+			'Možete. Nakon selidbe očistit ćemo stari ili novi prostor, a stvari koje vam trenutno ne trebaju čuvamo u skladištu. Sve dogovarate s jednim timom i jednim kontaktom.',
+	},
+];
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: questions.map((item) => ({
+		'@type': 'Question',
+		name: item.question,
+		acceptedAnswer: { '@type': 'Answer', text: item.answer },
+	})),
+};
+---
+
+<section class="faq" aria-labelledby="faq-title">
+	<div class="container faq__inner" data-reveal>
+		<h2 id="faq-title" class="faq__title">Česta pitanja</h2>
+
+		<div class="faq__list" data-faq>
+			{
+				questions.map((item) => (
+					<details class="faq__item" name="cesta-pitanja">
+						<summary class="faq__question">
+							<span>{item.question}</span>
+							<Icon name="chevron-down" size={20} strokeWidth={1.5} class="faq__icon" />
+						</summary>
+						<div class="faq__answer">
+							<p>{item.answer}</p>
+						</div>
+					</details>
+				))
+			}
+		</div>
+
+		<p class="faq__more">
+			Niste pronašli odgovor? <TextLink href="/kontakt">Javite nam se</TextLink>.
+		</p>
+	</div>
+
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</section>
+
+<script>
+	// Animated accordion on top of native <details>: one open at a time.
+	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+	// Reads --duration-accordion in ms. The CSS minifier may rewrite "300ms"
+	// as ".3s", so both units are handled.
+	const duration = () => {
+		const value = getComputedStyle(document.documentElement).getPropertyValue('--duration-accordion').trim();
+		const number = parseFloat(value);
+		if (Number.isNaN(number)) return 300;
+		return value.endsWith('ms') ? number : number * 1000;
+	};
+
+	document.querySelectorAll<HTMLElement>('[data-faq]').forEach((list) => {
+		const items = Array.from(list.querySelectorAll<HTMLDetailsElement>('details'));
+		const animations = new WeakMap<HTMLDetailsElement, Animation>();
+
+		// The script handles exclusivity itself (animated). With `name` left
+		// on, opening one item would snap the other shut without animation.
+		items.forEach((item) => item.removeAttribute('name'));
+
+		const answerOf = (item: HTMLDetailsElement) => item.querySelector<HTMLElement>('.faq__answer')!;
+
+		const animate = (item: HTMLDetailsElement, from: number, to: number, onFinish?: () => void) => {
+			animations.get(item)?.cancel();
+			const animation = answerOf(item).animate(
+				{ height: [`${from}px`, `${to}px`] },
+				{ duration: duration(), easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+			);
+			animations.set(item, animation);
+			animation.onfinish = () => {
+				animations.delete(item);
+				onFinish?.();
+			};
+		};
+
+		const open = (item: HTMLDetailsElement) => {
+			const from = item.open ? answerOf(item).getBoundingClientRect().height : 0;
+			item.classList.remove('is-closing');
+			item.open = true;
+			animate(item, from, answerOf(item).scrollHeight);
+		};
+
+		const close = (item: HTMLDetailsElement) => {
+			if (!item.open || item.classList.contains('is-closing')) return;
+			// .is-closing flips the question colour/chevron back right away,
+			// while the answer is still sliding shut.
+			item.classList.add('is-closing');
+			animate(item, answerOf(item).getBoundingClientRect().height, 0, () => {
+				item.open = false;
+				item.classList.remove('is-closing');
+			});
+		};
+
+		items.forEach((item) => {
+			item.querySelector('summary')!.addEventListener('click', (event) => {
+				event.preventDefault();
+				const opening = !item.open || item.classList.contains('is-closing');
+
+				if (reducedMotion.matches) {
+					items.forEach((other) => (other.open = other === item && opening));
+					return;
+				}
+
+				if (opening) {
+					items.filter((other) => other !== item).forEach(close);
+					open(item);
+				} else {
+					close(item);
+				}
+			});
+		});
+	});
+</script>
+
+<style>
+	.faq {
+		padding-block: var(--section-padding-y);
+		background-color: var(--color-primary-shade);
+		color: var(--color-dark);
+	}
+
+	.faq__title {
+		text-align: center;
+	}
+
+	.faq__list {
+		max-width: var(--faq-width);
+		margin: var(--space-12) auto 0;
+	}
+
+	.faq__item + .faq__item {
+		border-top: 1px dotted var(--color-dark-30);
+	}
+
+	/* ---- Question row ---- */
+	.faq__question {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: var(--space-6);
+		padding-block: var(--space-5);
+		font-size: var(--text-lg);
+		line-height: var(--leading-lg);
+		font-weight: var(--weight-medium);
+		list-style: none; /* hides the native marker */
+		cursor: pointer;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.faq__question::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq__question:focus-visible {
+		outline-offset: var(--space-1);
+	}
+
+	.faq__question :global(.faq__icon) {
+		transition: transform var(--duration-accordion) var(--ease-out);
+	}
+
+	/* Hover and open: the question and chevron turn Accent; open flips the chevron. */
+	.faq__question:hover,
+	.faq__item[open]:not(.is-closing) .faq__question {
+		color: var(--color-accent);
+	}
+
+	.faq__item[open]:not(.is-closing) .faq__question :global(.faq__icon) {
+		transform: rotate(180deg);
+	}
+
+	/* ---- Answer ---- */
+	.faq__answer {
+		overflow: hidden; /* clips the text during the height animation */
+	}
+
+	.faq__answer p {
+		/* right padding keeps the text clear of the chevron column */
+		padding: 0 var(--space-12) var(--space-6) 0;
+		color: var(--color-dark-80);
+	}
+
+	/* ---- "Niste pronašli odgovor?" ---- */
+	.faq__more {
+		margin-top: var(--space-12);
+		text-align: center;
+		color: var(--color-dark-80);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.faq__question,
+		.faq__question :global(.faq__icon) {
+			transition: none;
+		}
+	}
+</style>

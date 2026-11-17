@@ -1,6 +1,7 @@
 ---
 /**
- * Home "Naše usluge" section (user reference: "Construction Services").
+ * Home services section (eyebrow "Usluge", h2 "Sve na jednom mjestu";
+ * user reference: "Construction Services").
  * Left: h2, lead and a card listing all 6 services (PRD §2.2) as vertical
  * tabs. Right: the active service's panel (two images, title, text and a
  * "Saznaj više" link to its anchor on /usluge).
@@ -81,16 +82,18 @@ const items = services.map((service, index) => ({
 <section class="services" aria-labelledby="services-title">
 	<div class="container services__inner" data-reveal>
 		<div class="services__intro">
-			<h2 id="services-title">Naše usluge</h2>
+			<p class="eyebrow eyebrow--accent" id="services-eyebrow">Usluge</p>
+			<h2 id="services-title" class="services__title">Sve na jednom mjestu</h2>
 			<p class="services__lead">
-				Od jedne pošiljke do kompletne selidbe – sve što vam treba, na jednom mjestu.
+				Od jedne pošiljke do kompletne selidbe – jedan tim za sve što vam treba.
 			</p>
 
+			<!-- Labelled by the eyebrow, so the list is announced as "Usluge". -->
 			<div
 				class="services__tabs"
 				role="tablist"
 				aria-orientation="vertical"
-				aria-labelledby="services-title"
+				aria-labelledby="services-eyebrow"
 				data-services-tabs
 			>
 				{
@@ -200,6 +203,11 @@ const items = services.map((service, index) => ({
 		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
 		align-items: start;
 		gap: var(--space-16);
+	}
+
+	/* eyebrow → 16px → h2, as in the About section */
+	.services__title {
+		margin-top: var(--space-4);
 	}
 
 	.services__lead {

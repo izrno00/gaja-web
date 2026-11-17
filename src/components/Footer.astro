@@ -1,0 +1,272 @@
+---
+/**
+ * Site footer (PRD §5), on every page. Built from the user's reference
+ * ("RoofPro Services" footer). Dark background.
+ *
+ * Top: tagline + social icons | "Brzi linkovi" (nav pages, uppercase) |
+ * "Kontakt" (email, phone, address with round icons).
+ * Middle: a huge "GAJA TRANS" wordmark spanning the container width
+ * ("TRANS" muted, as the reference's two-tone wordmark). Decorative, so it's
+ * hidden from screen readers.
+ * Bottom bar: © + company name + OIB (Croatian legal requirement) on the
+ * left, "Politika privatnosti" on the right.
+ */
+import Icon, { type IconName } from './icons/Icon.astro';
+import { site, navItems } from '../data/site';
+
+const year = new Date().getFullYear();
+
+const socials: { icon: IconName; label: string; href: string }[] = [
+	{ icon: 'facebook', label: 'GAJA TRANS na Facebooku', href: site.social.facebook },
+	{ icon: 'instagram', label: 'GAJA TRANS na Instagramu', href: site.social.instagram },
+];
+
+// `lines`: each entry is its own line (the address breaks after the street).
+const contacts: { icon: IconName; label: string; lines: string[]; href: string; external?: boolean }[] = [
+	{ icon: 'mail', label: 'Email', lines: [site.email], href: `mailto:${site.email}` },
+	{ icon: 'phone', label: 'Telefon', lines: [site.phone.display], href: site.phone.href },
+	{
+		icon: 'map-pin',
+		label: 'Adresa',
+		lines: [site.address.street, `${site.address.postalCode} ${site.address.city}`],
+		href: site.address.mapsUrl,
+		external: true,
+	},
+];
+---
+
+<footer class="footer">
+	<div class="container">
+		<div class="footer__top">
+			<div class="footer__about">
+				<p class="footer__tagline">Vaš pouzdan partner za prijevoz, dostavu i selidbe diljem Hrvatske.</p>
+				<ul class="footer__socials" role="list">
+					{
+						socials.map((social) => (
+							<li>
+								<a class="footer__circle footer__social" href={social.href} target="_blank" rel="noopener">
+									<Icon name={social.icon} size={18} strokeWidth={1.5} />
+									<span class="visually-hidden">
+										{social.label} (otvara se u novoj kartici)
+									</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<nav class="footer__col" aria-labelledby="footer-links-title">
+				<p class="eyebrow footer__heading" id="footer-links-title">Brzi linkovi</p>
+				<ul class="footer__links" role="list">
+					{
+						navItems.map((item) => (
+							<li>
+								<a class="footer__link" href={item.href}>
+									{item.label}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</nav>
+
+			<div class="footer__col">
+				<p class="eyebrow footer__heading">Kontakt</p>
+				<ul class="footer__contacts" role="list">
+					{
+						contacts.map((contact) => (
+							<li>
+								<a
+									class="footer__contact"
+									href={contact.href}
+									{...(contact.external ? { target: '_blank', rel: 'noopener' } : {})}
+								>
+									<span class="footer__circle">
+										<Icon name={contact.icon} size={18} strokeWidth={1.5} />
+									</span>
+									<span class="footer__contact-text">
+										<span class="footer__contact-label">{contact.label}</span>
+										{contact.lines.map((line) => (
+											<span class="footer__contact-value">{line}</span>
+										))}
+									</span>
+									{contact.external && <span class="visually-hidden"> (otvara se u novoj kartici)</span>}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+
+		<p class="footer__wordmark" aria-hidden="true">
+			GAJA <span class="footer__wordmark-muted">TRANS</span>
+		</p>
+
+		<div class="footer__bottom">
+			<p>© {year} {site.legalName} · OIB {site.oib}. Sva prava pridržana.</p>
+			<a class="footer__link footer__link--plain" href="/politika-privatnosti">Politika privatnosti</a>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.footer {
+		/* cqi in --text-wordmark = this footer's width */
+		container-type: inline-size;
+		padding-top: var(--space-16);
+		background-color: var(--color-dark);
+		color: var(--color-primary);
+		--focus-color: var(--color-light);
+	}
+
+	/* ---- Top: 3 columns. The reference is ≈ 50/25/25; the contact column
+	   gets a bit more so the email fits on one line. ---- */
+	.footer__top {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr);
+		gap: var(--space-8);
+	}
+
+	.footer__tagline {
+		max-width: 340px;
+		color: var(--color-primary-60);
+	}
+
+	.footer__socials {
+		display: flex;
+		gap: var(--space-3);
+		margin-top: var(--space-6);
+	}
+
+	.footer__circle {
+		display: grid;
+		place-items: center;
+		flex: none;
+		width: var(--social-size);
+		height: var(--social-size);
+		border-radius: var(--radius-round);
+		background-color: var(--color-primary-12);
+		color: var(--color-primary);
+		/* The fill fades, but the icon colour switches in one step at the
+		   midpoint (same fix as the outline Button). If both faded together,
+		   icon and fill passed through the same grey halfway (measured contrast
+		   1:1), so the icon vanished and reappeared: a blink on hover in/out.
+		   Same transition in both directions, so it's set on the base rule. */
+		transition:
+			background-color var(--duration-fast) ease-in-out,
+			color 0s linear calc(var(--duration-fast) / 2);
+	}
+
+	.footer__social:hover {
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.footer__heading {
+		margin-bottom: var(--space-6);
+	}
+
+	/* ---- Quick links ---- */
+	.footer__links {
+		display: grid;
+		gap: var(--space-4);
+	}
+
+	.footer__link {
+		font-size: var(--text-small);
+		font-weight: var(--weight-medium);
+		letter-spacing: var(--tracking-eyebrow);
+		text-transform: uppercase;
+		color: var(--color-primary-60);
+		transition: color var(--duration-fast) ease;
+	}
+
+	.footer__link:hover {
+		color: var(--color-primary);
+		text-decoration-line: underline;
+		text-underline-offset: 4px;
+	}
+
+	.footer__link--plain {
+		letter-spacing: normal;
+		text-transform: none;
+	}
+
+	/* ---- Contact ---- */
+	.footer__contacts {
+		display: grid;
+		gap: var(--space-5);
+	}
+
+	.footer__contact {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	.footer__contact-text {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.footer__contact-label {
+		font-size: var(--text-small);
+		color: var(--color-primary-60);
+	}
+
+	.footer__contact-value {
+		overflow-wrap: anywhere;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.footer__contact:hover .footer__circle {
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.footer__contact:hover .footer__contact-value {
+		text-decoration-line: underline;
+		text-underline-offset: 4px;
+	}
+
+	/* ---- Wordmark ---- */
+	.footer__wordmark {
+		margin-top: var(--space-16);
+		font-size: var(--text-wordmark);
+		font-weight: var(--weight-bold);
+		line-height: 1;
+		letter-spacing: -0.02em;
+		white-space: nowrap;
+		/* trim the empty space under the caps so the bottom bar sits close */
+		margin-bottom: -0.12em;
+	}
+
+	.footer__wordmark-muted {
+		font-weight: var(--weight-medium);
+		color: var(--color-primary-60);
+	}
+
+	/* ---- Bottom bar ---- */
+	.footer__bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-6);
+		margin-top: var(--space-8);
+		padding-block: var(--space-6);
+		border-top: 1px solid var(--color-primary-12);
+		font-size: var(--text-small);
+		color: var(--color-primary-60);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.footer__circle,
+		.footer__link,
+		.footer__contact-value {
+			transition: none;
+		}
+	}
+</style>

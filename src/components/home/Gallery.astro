@@ -1,0 +1,521 @@
+---
+/**
+ * Home "Galerija" section (user reference: "Naši projekti" carousel).
+ * Dark section (second reference: "Naš rad / Od utovara do isporuke"):
+ * eyebrow + h2 + lead with the "Vidi više" link on the right, a horizontal
+ * strip of 8 portrait (4:5) photos, then position dots (left) and round
+ * prev/next arrows (right). Photos stay clean until hover.
+ *
+ * Layout: 3 cards fill the 1140px container exactly; the strip runs to the
+ * right edge of the screen, so the 4th card peeks in (as in the reference).
+ * At the end, the last card lines up with the container's right edge, so 8
+ * cards give 6 stop positions = 6 dots.
+ *
+ * Behaviour:
+ * - Native horizontal scrolling with scroll snap (trackpad / touch swipe work).
+ * - Arrows move one card; they dim (disabled) at the ends. No wrap, no autoplay.
+ * - Mouse drag (pointer events), snapping to the nearest card on release.
+ * - Dots are indicators only (not clickable, aria-hidden).
+ * - Hover or keyboard focus on a card dims the photo with a Dark overlay and
+ *   slides up its caption (service tag, title, one sentence). Cards aren't links.
+ * - Without JS: the strip still scrolls natively; dots and arrows are hidden.
+ *
+ * Images are PLACEHOLDERS: the hero van photo with four different 4:5 crops
+ * (user decision). Copy is placeholder too (needs client approval).
+ */
+import { Image } from 'astro:assets';
+import Icon from '../icons/Icon.astro';
+import TextLink from '../TextLink.astro';
+import vanPhoto from '../../assets/hero-van.png';
+
+interface Crop {
+	/** CSS object-position for the 4:5 crop of the landscape photo. */
+	position: string;
+	alt: string;
+}
+
+const crops = {
+	van: { position: '70% center', alt: 'Bijeli dostavni kombi ispred skladišta' },
+	docks: { position: '0% center', alt: 'Utovarne rampe skladišta' },
+	side: { position: '100% center', alt: 'Bočna strana bijelog dostavnog kombija' },
+	mixed: { position: '40% center', alt: 'Utovarna rampa i prednji dio dostavnog kombija' },
+} satisfies Record<string, Crop>;
+
+interface Project {
+	/** Service name, shown as an eyebrow (uppercased with CSS). */
+	tag: string;
+	title: string;
+	text: string;
+	crop: Crop;
+}
+
+const projects: Project[] = [
+	{
+		tag: 'Selidbe',
+		title: 'Selidba stana u Osijeku',
+		text: 'Pakiranje, rastavljanje i ponovno slaganje namještaja – sve u jednom danu.',
+		crop: crops.van,
+	},
+	{
+		tag: 'Skladištenje',
+		title: 'Privremeno skladištenje opreme',
+		text: 'Uredska oprema na sigurnom tijekom renovacije, dostavljena čim je zatrebala.',
+		crop: crops.docks,
+	},
+	{
+		tag: 'Prijevoz i dostava',
+		title: 'Dostava namještaja kupcima',
+		text: 'Preuzimanje iz trgovine i dostava na kućnu adresu, uz unos u stan.',
+		crop: crops.side,
+	},
+	{
+		tag: 'Uređenje okoliša',
+		title: 'Uređenje dvorišta obiteljske kuće',
+		text: 'Košnja, orezivanje živice i odvoz zelenog otpada u jednom dolasku.',
+		crop: crops.mixed,
+	},
+	{
+		tag: 'Čišćenje prostora',
+		title: 'Čišćenje stana nakon selidbe',
+		text: 'Temeljito čišćenje praznog stana prije predaje novim stanarima.',
+		crop: crops.van,
+	},
+	{
+		tag: 'Dodatne usluge',
+		title: 'Pražnjenje podruma i tavana',
+		text: 'Razvrstavanje, iznošenje i odvoz glomaznog otpada na zbrinjavanje.',
+		crop: crops.docks,
+	},
+	{
+		tag: 'Selidbe',
+		title: 'Selidba ureda preko vikenda',
+		text: 'Preseljenje cijelog ureda bez prekida u radu tvrtke.',
+		crop: crops.side,
+	},
+	{
+		tag: 'Prijevoz i dostava',
+		title: 'Redovita dostava za trgovine',
+		text: 'Tjedna dostava robe iz skladišta na prodajna mjesta diljem Slavonije.',
+		crop: crops.mixed,
+	},
+];
+---
+
+<section class="gallery" aria-labelledby="gallery-title" data-gallery>
+	<div data-reveal>
+		<div class="container gallery__head">
+			<div class="gallery__intro">
+				<p class="eyebrow gallery__eyebrow">Galerija</p>
+				<h2 id="gallery-title">Od utovara do isporuke</h2>
+				<p class="gallery__lead">
+					Selidbe, dostave i skladištenje za privatne i poslovne klijente. Pogledajte kako radimo na terenu.
+				</p>
+			</div>
+			<TextLink href="/galerija" variant="light">Vidi više</TextLink>
+		</div>
+
+		<ul class="gallery__track" role="list" data-gallery-track>
+			{
+				projects.map((project) => (
+					<li class="gallery__item">
+						<figure class="gallery__card" tabindex="0">
+							<Image
+								src={vanPhoto}
+								alt={project.crop.alt}
+								widths={[960, 1280, vanPhoto.width]}
+								sizes="(min-width: 1188px) 805px, 70vw"
+								format="webp"
+								loading="lazy"
+								draggable="false"
+								class="gallery__image"
+								style={`--image-position: ${project.crop.position}`}
+							/>
+							<figcaption class="gallery__caption">
+								<span class="gallery__caption-inner">
+									<span class="eyebrow">{project.tag}</span>
+									<span class="gallery__title">{project.title}</span>
+									<span class="gallery__text">{project.text}</span>
+								</span>
+							</figcaption>
+						</figure>
+					</li>
+				))
+			}
+		</ul>
+
+		<div class="container gallery__controls">
+			<div class="gallery__dots" aria-hidden="true">
+				{projects.map((_, index) => <span class:list={['gallery__dot', { 'is-active': index === 0 }]} />)}
+			</div>
+			<div class="gallery__arrows">
+				<button
+					type="button"
+					class="gallery__arrow gallery__arrow--prev"
+					aria-label="Prethodna fotografija"
+					data-gallery-prev
+					disabled
+				>
+					<Icon name="arrow-left" size={20} strokeWidth={1.5} />
+				</button>
+				<button
+					type="button"
+					class="gallery__arrow gallery__arrow--next"
+					aria-label="Sljedeća fotografija"
+					data-gallery-next
+				>
+					<Icon name="arrow-right" size={20} strokeWidth={1.5} />
+				</button>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	// Carousel: arrows (one card per click), mouse drag, dots + arrow state.
+	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+	document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
+		const track = gallery.querySelector<HTMLElement>('[data-gallery-track]');
+		const prev = gallery.querySelector<HTMLButtonElement>('[data-gallery-prev]');
+		const next = gallery.querySelector<HTMLButtonElement>('[data-gallery-next]');
+		const dots = Array.from(gallery.querySelectorAll<HTMLElement>('.gallery__dot'));
+		if (!track || !prev || !next) return;
+		const items = Array.from(track.children) as HTMLElement[];
+
+		// Distance between two snap positions (card width + gap).
+		const step = () => (items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : track.clientWidth);
+		const maxScroll = () => track.scrollWidth - track.clientWidth;
+		// Number of reachable stop positions (6 for 8 cards with 3 visible).
+		const positions = () => Math.round(maxScroll() / step()) + 1;
+		const clampIndex = (index: number) => Math.max(0, Math.min(positions() - 1, index));
+		const currentIndex = () => clampIndex(Math.round(track.scrollLeft / step()));
+
+		const scrollToIndex = (index: number) => {
+			track.scrollTo({
+				left: clampIndex(index) * step(),
+				behavior: reducedMotion.matches ? 'auto' : 'smooth',
+			});
+		};
+
+		const update = () => {
+			const count = positions();
+			const active = currentIndex();
+			dots.forEach((dot, index) => {
+				dot.hidden = index >= count;
+				dot.classList.toggle('is-active', index === active);
+			});
+			prev.disabled = track.scrollLeft <= 1;
+			next.disabled = track.scrollLeft >= maxScroll() - 1;
+		};
+
+		let frame = 0;
+		const scheduleUpdate = () => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(update);
+		};
+
+		track.addEventListener('scroll', scheduleUpdate, { passive: true });
+		window.addEventListener('resize', scheduleUpdate);
+		prev.addEventListener('click', () => scrollToIndex(currentIndex() - 1));
+		next.addEventListener('click', () => scrollToIndex(currentIndex() + 1));
+
+		// ---- Mouse drag ----
+		// Snap is switched off while dragging (.is-dragging), then the strip
+		// glides to a card and snap comes back once it has arrived there.
+		let drag: { x: number; left: number; moved: boolean } | null = null;
+
+		const finishDrag = () => track.classList.remove('is-dragging');
+
+		track.addEventListener('pointerdown', (event) => {
+			if (event.pointerType !== 'mouse' || event.button !== 0) return;
+			drag = { x: event.clientX, left: track.scrollLeft, moved: false };
+		});
+
+		track.addEventListener('pointermove', (event) => {
+			if (!drag) return;
+			const dx = event.clientX - drag.x;
+			if (!drag.moved) {
+				if (Math.abs(dx) < 4) return; // a plain click stays a click (focus)
+				drag.moved = true;
+				track.setPointerCapture(event.pointerId);
+				track.classList.add('is-dragging');
+			}
+			track.scrollLeft = drag.left - dx;
+		});
+
+		const endDrag = (event: PointerEvent) => {
+			if (!drag) return;
+			const { x, moved } = drag;
+			drag = null;
+			if (!moved) return;
+
+			// A deliberate drag (> 15% of a card) moves on in that direction;
+			// a short one falls back to the nearest card.
+			const dx = event.clientX - x;
+			const position = track.scrollLeft / step();
+			let target = Math.round(position);
+			if (Math.abs(dx) > step() * 0.15) target = dx < 0 ? Math.ceil(position) : Math.floor(position);
+			target = clampIndex(target);
+
+			if (Math.abs(track.scrollLeft - target * step()) < 1) {
+				finishDrag();
+				return;
+			}
+			scrollToIndex(target);
+			if ('onscrollend' in window) {
+				track.addEventListener('scrollend', finishDrag, { once: true });
+			} else {
+				setTimeout(finishDrag, 700);
+			}
+		};
+
+		track.addEventListener('pointerup', endDrag);
+		track.addEventListener('pointercancel', endDrag);
+
+		update();
+	});
+</script>
+
+<style>
+	.gallery {
+		/* cqi below = this section's width (the full viewport width) */
+		container-type: inline-size;
+		--gallery-gap: var(--space-6);
+		/* width of .container, the gutter on each side, and one card (3 per container) */
+		--gallery-content: min(100cqi - 2 * var(--container-gutter), var(--container-max));
+		--gallery-bleed: calc((100cqi - var(--gallery-content)) / 2);
+		--gallery-card: calc((var(--gallery-content) - 2 * var(--gallery-gap)) / 3);
+
+		padding-block: var(--section-padding-y);
+		background-color: var(--color-dark);
+		color: var(--color-primary);
+		/* Dark section: focus rings in Light (see global notes). */
+		--focus-color: var(--color-light);
+	}
+
+	/* Eyebrow + h2 + lead on the left; "Vidi više" on the right, on the lead's
+	   last line (as in the reference). */
+	.gallery__head {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: var(--space-8);
+	}
+
+	.gallery__eyebrow {
+		margin-bottom: var(--space-4);
+	}
+
+	.gallery__lead {
+		max-width: 600px;
+		margin-top: var(--space-4);
+		color: var(--color-primary-80);
+	}
+
+	/* ---- Strip ---- */
+	.gallery__track {
+		display: flex;
+		gap: var(--gallery-gap);
+		margin-top: var(--space-12);
+		/* Starts at the container's left edge; the end padding lets the last
+		   card stop at the container's right edge. */
+		padding-inline: var(--gallery-bleed);
+		scroll-padding-inline: var(--gallery-bleed);
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+		cursor: grab;
+	}
+
+	.gallery__track::-webkit-scrollbar {
+		display: none;
+	}
+
+	.gallery__track.is-dragging {
+		scroll-snap-type: none;
+		cursor: grabbing;
+		user-select: none;
+	}
+
+	.gallery__item {
+		flex: 0 0 var(--gallery-card);
+		scroll-snap-align: start;
+	}
+
+	/* ---- Card ---- */
+	.gallery__card {
+		position: relative;
+		overflow: hidden;
+		border-radius: var(--radius);
+	}
+
+	/* Inset ring: the strip clips anything drawn outside the card. It sits on
+	   the dark overlay, so it uses Primary. */
+	.gallery__card:focus-visible {
+		--focus-color: var(--color-primary);
+		outline-offset: calc(-1 * var(--space-2));
+	}
+
+	.gallery__card :global(.gallery__image) {
+		width: 100%;
+		aspect-ratio: 4 / 5;
+		height: auto;
+		object-fit: cover;
+		object-position: var(--image-position, center);
+		-webkit-user-drag: none;
+	}
+
+	/* Hover / focus: the photo dims and the caption slides up. */
+	.gallery__caption {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: flex-end;
+		padding: var(--space-6);
+		background-color: var(--color-overlay-card);
+		color: var(--color-primary);
+		opacity: 0;
+		transition: opacity var(--duration-overlay) ease;
+	}
+
+	.gallery__caption-inner {
+		display: flex;
+		flex-direction: column;
+		transform: translateY(var(--space-4));
+		transition: transform var(--duration-overlay) var(--ease-out);
+	}
+
+	.gallery__card:hover .gallery__caption,
+	.gallery__card:focus-visible .gallery__caption {
+		opacity: 1;
+	}
+
+	.gallery__card:hover .gallery__caption-inner,
+	.gallery__card:focus-visible .gallery__caption-inner {
+		transform: none;
+	}
+
+	/* No caption flashing while the strip is dragged across the cursor. */
+	.gallery__track.is-dragging .gallery__caption {
+		opacity: 0;
+	}
+
+	.gallery__title {
+		margin-top: var(--space-2);
+		font-size: var(--text-lg);
+		line-height: var(--leading-lg);
+		font-weight: var(--weight-semibold);
+	}
+
+	.gallery__text {
+		margin-top: var(--space-1);
+		color: var(--color-primary-80);
+	}
+
+	/* ---- Dots + arrows ---- */
+	.gallery__controls {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: var(--space-10);
+	}
+
+	/* Without JS the strip still scrolls natively; the controls would do nothing. */
+	:global(html:not(.js)) .gallery__controls {
+		display: none;
+	}
+
+	.gallery__dots {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.gallery__dot {
+		width: var(--dot-size);
+		height: var(--dot-size);
+		border-radius: var(--radius-round);
+		background-color: var(--color-primary-50);
+		transition:
+			width var(--duration-fast) ease,
+			height var(--duration-fast) ease,
+			background-color var(--duration-fast) ease;
+	}
+
+	.gallery__dot.is-active {
+		width: var(--dot-size-active);
+		height: var(--dot-size-active);
+		background-color: var(--color-primary);
+	}
+
+	.gallery__arrows {
+		display: flex;
+		gap: var(--space-3);
+	}
+
+	/* Round outline arrows (reference). Hover fills them with Primary.
+	   The fill fades but the icon colour switches in one step at the
+	   midpoint, so icon and fill never meet in the same grey (the blink
+	   fixed on the outline Button and the footer icons). */
+	.gallery__arrow {
+		display: grid;
+		place-items: center;
+		width: var(--carousel-arrow-size);
+		height: var(--carousel-arrow-size);
+		padding: 0;
+		border: 1px solid var(--color-primary-60);
+		border-radius: var(--radius-round);
+		background-color: transparent;
+		color: var(--color-primary);
+		cursor: pointer;
+		transition:
+			background-color var(--duration-fast) ease-in-out,
+			border-color var(--duration-fast) ease-in-out,
+			color 0s linear calc(var(--duration-fast) / 2);
+	}
+
+	.gallery__arrow:hover:not(:disabled) {
+		border-color: var(--color-primary);
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.gallery__arrow :global(svg) {
+		transition: transform var(--duration-fast) ease;
+	}
+
+	.gallery__arrow--prev:hover:not(:disabled) :global(svg) {
+		transform: translateX(-3px);
+	}
+
+	.gallery__arrow--next:hover:not(:disabled) :global(svg) {
+		transform: translateX(3px);
+	}
+
+	/* At an end: a faint grey fill like the reference's inactive arrow. */
+	.gallery__arrow:disabled {
+		border-color: transparent;
+		background-color: var(--color-primary-20);
+		color: var(--color-primary-60);
+		cursor: default;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.gallery__caption,
+		.gallery__caption-inner,
+		.gallery__dot,
+		.gallery__arrow,
+		.gallery__arrow :global(svg) {
+			transition: none;
+		}
+
+		.gallery__caption-inner {
+			transform: none;
+		}
+
+		.gallery__arrow:hover :global(svg) {
+			transform: none;
+		}
+	}
+</style>

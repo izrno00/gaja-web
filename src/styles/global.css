@@ -14,6 +14,17 @@
 	/* ---- Derived variants (opacity / mixes of the palette only) ----
 	   Hover colours are provisional; the client will revise them (PRD §13). */
 	--color-primary-80: rgb(235 237 245 / 0.8); /* hero lead text */
+	--color-dark-30: rgb(10 20 40 / 0.3); /* dotted FAQ dividers */
+	--color-dark-60: rgb(10 20 40 / 0.6); /* form placeholders */
+	--color-input-border: rgb(10 20 40 / 0.2); /* form field borders */
+	/* Light tints of Primary for use on Accent / Dark backgrounds. */
+	--color-primary-12: rgb(235 237 245 / 0.12); /* cards, icon circles, hairlines on dark */
+	--color-primary-20: rgb(235 237 245 / 0.2); /* dividers / hover fill on Accent, disabled arrows on Dark */
+	--color-primary-50: rgb(235 237 245 / 0.5); /* inactive carousel dots on Dark (≈ 4.7:1) */
+	--color-primary-60: rgb(235 237 245 / 0.6); /* muted text on Dark (footer), arrow borders */
+	/* Form errors. The palette has no red, so errors use Dark (plus a thicker
+	   border and an icon). Change this one token if a red is ever approved. */
+	--color-error: var(--color-dark);
 	--color-dark-80: rgb(10 20 40 / 0.8); /* body text on light sections */
 	--color-accent-hover: color-mix(in srgb, var(--color-accent) 85%, var(--color-dark));
 	--color-overlay-start: rgb(10 20 40 / 0.84);
@@ -25,6 +36,8 @@
 	   on it (replaces the white-card-on-grey look of references). */
 	--color-primary-shade: color-mix(in srgb, var(--color-primary) 94%, var(--color-dark));
 	--color-border: rgb(10 20 40 / 0.1); /* hairline dividers on light surfaces */
+	/* Hover overlay that mutes a gallery image so its caption is readable. */
+	--color-overlay-card: rgb(10 20 40 / 0.7);
 	/* Partner logos: muted at rest, full on hover (user decision). */
 	--opacity-logo: 0.45;
 
@@ -71,10 +84,13 @@
 	--text-button: 18px;
 	--text-banner: 16px;
 	--text-logo: 40px;
+	/* Footer wordmark "GAJA TRANS": scales so it spans the container width.
+	   100cqi = the footer's width (the footer is an inline-size container). */
+	--text-wordmark: calc(min(100cqi - 2 * var(--container-gutter), var(--container-max)) * 0.1655);
 
 	/* ---- Radius (PRD §4.3) ---- */
 	--radius: 4px;
-	--radius-round: 50%; /* WhatsApp button only (user decision) */
+	--radius-round: 50%; /* WhatsApp button and carousel dots (both from user references) */
 
 	/* ---- Spacing scale ---- */
 	--space-1: 4px;
@@ -93,6 +109,9 @@
 
 	/* Vertical padding of a standard content section. */
 	--section-padding-y: var(--space-24);
+	/* Section padding that shrinks on short screens: 40px at 800px tall,
+	   96px from ~1080px tall (home Galerija, fit-to-screen). */
+	--section-padding-fit: clamp(var(--space-10), calc(var(--space-10) + (100svh - 800px) * 0.2), var(--space-24));
 	/* Spacing inside the one-screen home About + logos block. It scales with
 	   the viewport height: 16px on screens ~770px tall, ~42px at 900px, at most
 	   64px. Tuned so the block fits from ~768px tall viewports up (the About
@@ -124,6 +143,20 @@
 	--fab-size: 56px;
 	--about-media-min: 320px; /* smallest height of the home About photo */
 	--logo-strip-height: 28px; /* partner logos (home "Tvrtke koje nam vjeruju") */
+	--carousel-arrow-size: var(--button-height); /* round gallery arrows (52px, as in the reference) */
+	--faq-width: 760px; /* narrow centred FAQ column (readable line length) */
+	--input-height: 48px; /* form text inputs */
+	--social-size: 40px; /* round social / contact icon circles in the footer */
+	/* Home "Javite nam se": blocks centred in their colour halves (user decision). */
+	--contact-half-max: 720px; /* half of the 1440 design width; caps the halves on wide screens */
+	--contact-intro-width: 480px;
+	--contact-card-width: 522px;
+	--dot-size: 10px; /* carousel position dots */
+	--dot-size-active: 14px;
+	/* Text links ("Više o nama", "Vidi više"): underline like the gallery reference. */
+	--link-underline: 1px;
+	--link-underline-hover: 2px;
+	--link-underline-offset: 6px;
 
 	/* ---- Motion ---- */
 	--duration-fast: 200ms;
@@ -133,6 +166,8 @@
 	--reveal-distance: 28px;
 	--duration-panel: 400ms; /* tab panel crossfade (home services) */
 	--duration-marquee: 40s; /* one full loop of the partner logo strip */
+	--duration-overlay: 300ms; /* gallery hover overlay + caption */
+	--duration-accordion: 300ms; /* FAQ answer open/close */
 
 	/* ---- Layers ---- */
 	--z-header: 100;

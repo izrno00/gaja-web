@@ -1,0 +1,379 @@
+---
+/**
+ * Inquiry form (PRD §7), shared by the home "Javite nam se" section and the
+ * future /kontakt page (user decision: the form appears on both).
+ *
+ * Fields: Ime i prezime*, Email*, Telefon (optional, user decision),
+ * Naslov* (used as the email subject, user decision), Poruka*, privacy
+ * consent*. Hidden: subject, from_name, honeypot `botcheck`. The field
+ * names already follow Web3Forms.
+ *
+ * Validation: client side, `novalidate` + a small script, so the messages
+ * are in Croatian. Each error is tied to its field with aria-describedby and
+ * aria-invalid; the first invalid field gets focus. After the first submit
+ * attempt, fields re-validate as the visitor types.
+ *
+ * SENDING IS NOT CONNECTED YET (user decision: ignore Web3Forms for now).
+ * A valid submit shows a message asking the visitor to call or email
+ * instead, so nobody is told their message was sent. See the TODO in the
+ * script for the Web3Forms step.
+ */
+import Button from './Button.astro';
+import Icon from './icons/Icon.astro';
+import { site } from '../data/site';
+
+interface Props {
+	/** Prefix for element ids, so two forms on one page never clash. */
+	idPrefix?: string;
+	class?: string;
+}
+
+const { idPrefix = 'upit', class: className } = Astro.props;
+const id = (name: string) => `${idPrefix}-${name}`;
+
+interface Field {
+	name: string;
+	label: string;
+	type: 'text' | 'email' | 'tel' | 'textarea';
+	required: boolean;
+	autocomplete?: string;
+	placeholder: string;
+	/** Croatian messages: [empty, invalid format]. */
+	messages: [string, string?];
+	full?: boolean;
+}
+
+const fields: Field[] = [
+	{
+		name: 'name',
+		label: 'Ime i prezime',
+		type: 'text',
+		required: true,
+		autocomplete: 'name',
+		placeholder: 'npr. Ivan Horvat',
+		messages: ['Upišite ime i prezime.'],
+	},
+	{
+		name: 'email',
+		label: 'Email',
+		type: 'email',
+		required: true,
+		autocomplete: 'email',
+		placeholder: 'npr. ivan@email.com',
+		messages: ['Upišite email adresu.', 'Upišite ispravnu email adresu, npr. ivan@email.com.'],
+	},
+	{
+		name: 'phone',
+		label: 'Telefon',
+		type: 'tel',
+		required: false,
+		autocomplete: 'tel',
+		placeholder: 'npr. 091 234 5678',
+		messages: ['', 'Upišite ispravan broj telefona.'],
+	},
+	{
+		name: 'naslov',
+		label: 'Naslov',
+		type: 'text',
+		required: true,
+		placeholder: 'npr. Selidba stana',
+		messages: ['Upišite naslov upita.'],
+	},
+	{
+		name: 'message',
+		label: 'Poruka',
+		type: 'textarea',
+		required: true,
+		placeholder: 'Opišite što vam treba: usluga, adresa, okvirni termin…',
+		messages: ['Napišite poruku.'],
+		full: true,
+	},
+];
+
+const consentMessage = 'Za slanje upita potrebna je vaša privola.';
+---
+
+<form class:list={['contact-form', className]} novalidate data-contact-form>
+	<input type="hidden" name="subject" value="Novi upit s web stranice – GAJA TRANS" />
+	<input type="hidden" name="from_name" value="GAJA TRANS – web stranica" />
+	<!-- Honeypot: hidden from people; bots that tick it are ignored. -->
+	<input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+	<div class="contact-form__grid">
+		{
+			fields.map((field) => (
+				<div
+					class:list={['field', { 'field--full': field.full }]}
+					data-field
+					data-message-empty={field.messages[0]}
+					data-message-invalid={field.messages[1]}
+				>
+					<label class="field__label" for={id(field.name)}>
+						{field.label}
+						{!field.required && <span class="field__optional"> (neobavezno)</span>}
+					</label>
+					{field.type === 'textarea' ? (
+						<textarea
+							class="field__control field__control--textarea"
+							id={id(field.name)}
+							name={field.name}
+							rows="5"
+							placeholder={field.placeholder}
+							required={field.required}
+							aria-describedby={id(`${field.name}-error`)}
+						/>
+					) : (
+						<input
+							class="field__control"
+							id={id(field.name)}
+							name={field.name}
+							type={field.type}
+							placeholder={field.placeholder}
+							autocomplete={field.autocomplete}
+							required={field.required}
+							pattern={field.type === 'tel' ? '[0-9+()/ \\-]{6,20}' : undefined}
+							aria-describedby={id(`${field.name}-error`)}
+						/>
+					)}
+					<p class="field__error" id={id(`${field.name}-error`)} hidden>
+						<Icon name="circle-alert" size={16} strokeWidth={2} />
+						<span data-error-text />
+					</p>
+				</div>
+			))
+		}
+
+		<div class="field field--full field--consent" data-field data-message-empty={consentMessage}>
+			<div class="consent">
+				<input
+					class="consent__box"
+					type="checkbox"
+					id={id('consent')}
+					name="consent"
+					required
+					aria-describedby={id('consent-error')}
+				/>
+				<label class="consent__label" for={id('consent')}>
+					Slažem se s obradom osobnih podataka u skladu s <a href="/politika-privatnosti">Politikom privatnosti</a>.
+				</label>
+			</div>
+			<p class="field__error" id={id('consent-error')} hidden>
+				<Icon name="circle-alert" size={16} strokeWidth={2} />
+				<span data-error-text />
+			</p>
+		</div>
+	</div>
+
+	<div class="contact-form__actions">
+		<Button type="submit" icon="arrow-right" class="contact-form__submit">Pošalji upit</Button>
+	</div>
+
+	<div class="contact-form__status" role="status" aria-live="polite" data-form-status></div>
+
+	<!-- Shown when sending isn't possible (not connected yet / network error). -->
+	<template data-message-fallback>
+		<p>
+			Slanje upita trenutno nije moguće. Nazovite nas na{' '}
+			<a href={site.phone.href}>{site.phone.display}</a>{' '}ili nam pišite na{' '}
+			<a href={`mailto:${site.email}`}>{site.email}</a>.
+		</p>
+	</template>
+</form>
+
+<script>
+	document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+		const fields = Array.from(form.querySelectorAll<HTMLElement>('[data-field]'));
+		const status = form.querySelector<HTMLElement>('[data-form-status]')!;
+		const fallback = form.querySelector<HTMLTemplateElement>('[data-message-fallback]')!;
+		let submitted = false;
+
+		const controlOf = (field: HTMLElement) =>
+			field.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')!;
+
+		/** Validates one field, shows/hides its message. Returns true when valid. */
+		const check = (field: HTMLElement) => {
+			const control = controlOf(field);
+			if (control instanceof HTMLInputElement && control.type !== 'checkbox') {
+				control.value = control.value.trimStart();
+			}
+			const { valueMissing } = control.validity;
+			const valid = control.checkValidity();
+			const message = valid
+				? ''
+				: valueMissing
+					? field.dataset.messageEmpty
+					: (field.dataset.messageInvalid ?? field.dataset.messageEmpty);
+
+			const error = field.querySelector<HTMLElement>('.field__error')!;
+			error.querySelector('[data-error-text]')!.textContent = message ?? '';
+			error.hidden = valid;
+			if (valid) control.removeAttribute('aria-invalid');
+			else control.setAttribute('aria-invalid', 'true');
+			return valid;
+		};
+
+		// After the first submit attempt, re-check fields while the visitor fixes them.
+		form.addEventListener('input', (event) => {
+			if (!submitted) return;
+			const field = (event.target as Element).closest<HTMLElement>('[data-field]');
+			if (field) check(field);
+		});
+
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			submitted = true;
+			status.replaceChildren();
+
+			const invalid = fields.filter((field) => !check(field));
+			if (invalid.length) {
+				controlOf(invalid[0]).focus();
+				return;
+			}
+
+			// Honeypot ticked → a bot. Pretend nothing happened.
+			if (form.querySelector<HTMLInputElement>('[name="botcheck"]')?.checked) return;
+
+			// Email subject from the "Naslov" field (user decision).
+			const naslov = form.querySelector<HTMLInputElement>('[name="naslov"]')!.value.trim();
+			form.querySelector<HTMLInputElement>('[name="subject"]')!.value = `Novi upit: ${naslov}`;
+
+			// TODO (Web3Forms, PRD §7): add a hidden `access_key` input from
+			// import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY plus the hCaptcha widget,
+			// then POST `new FormData(form)` to https://api.web3forms.com/submit with
+			// a "Šaljem…" loading state on the button. On success show
+			// "Hvala! Vaša poruka je poslana, javit ćemo vam se uskoro." and reset the
+			// form; on failure show the fallback below.
+			status.replaceChildren(fallback.content.cloneNode(true));
+		});
+	});
+</script>
+
+<style>
+	.contact-form__grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-5) var(--space-4);
+	}
+
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.field--full {
+		grid-column: 1 / -1;
+	}
+
+	.field__label {
+		font-size: var(--text-small);
+		font-weight: var(--weight-semibold);
+	}
+
+	.field__optional {
+		font-weight: var(--weight-medium);
+		color: var(--color-dark-60);
+	}
+
+	.field__control {
+		width: 100%;
+		height: var(--input-height);
+		padding: 0 var(--space-3);
+		border: 1px solid var(--color-input-border);
+		border-radius: var(--radius);
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+		font-size: var(--text-body);
+		transition: border-color var(--duration-fast) ease;
+	}
+
+	.field__control--textarea {
+		height: auto;
+		min-height: calc(var(--input-height) * 2.5);
+		padding-block: var(--space-3);
+		resize: vertical;
+	}
+
+	.field__control::placeholder {
+		color: var(--color-dark-60);
+		opacity: 1;
+	}
+
+	.field__control:hover {
+		border-color: var(--color-dark-60);
+	}
+
+	.field__control:focus-visible {
+		border-color: var(--color-accent);
+		outline-offset: 0;
+	}
+
+	/* Invalid: thicker Dark border (no red in the palette), plus the message. */
+	.field__control[aria-invalid='true'] {
+		border-color: var(--color-error);
+		box-shadow: inset 0 0 0 1px var(--color-error);
+	}
+
+	.field__error {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-size: var(--text-small);
+		font-weight: var(--weight-semibold);
+		color: var(--color-error);
+	}
+
+	.field__error[hidden] {
+		display: none;
+	}
+
+	/* ---- Consent ---- */
+	.consent {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-3);
+	}
+
+	.consent__box {
+		flex: none;
+		width: 18px;
+		height: 18px;
+		/* centre the box on the first text line */
+		margin-top: calc((var(--leading-body) * var(--text-small) - 18px) / 2);
+		accent-color: var(--color-accent);
+		cursor: pointer;
+	}
+
+	.consent__label {
+		font-size: var(--text-small);
+		color: var(--color-dark-80);
+		cursor: pointer;
+	}
+
+	.consent__label a,
+	.contact-form__status :global(a) {
+		color: var(--color-accent);
+		text-decoration-line: underline;
+		text-underline-offset: 3px;
+	}
+
+	.consent__label a:hover,
+	.contact-form__status :global(a:hover) {
+		color: var(--color-accent-hover);
+	}
+
+	/* ---- Actions + status ---- */
+	.contact-form__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: var(--space-6);
+	}
+
+	.contact-form__status:not(:empty) {
+		margin-top: var(--space-4);
+		padding: var(--space-3) var(--space-4);
+		border-left: 2px solid var(--color-error);
+		background-color: var(--color-primary-shade);
+		font-size: var(--text-small);
+	}
+</style>

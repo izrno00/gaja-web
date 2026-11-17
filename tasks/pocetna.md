@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-**State: PARTIAL.** The site foundation is done, and so are four sections of the home page: banner, header and hero (built from Figma node `61:88`, `Desktop`), the "O nama" teaser, the partner logo strip "Tvrtke koje nam vjeruju" and the "Naše usluge" section (the last three built from user reference images). Further home sections will come from the user's reference images. The footer is **not** built yet (it waits for the user's reference).
+**State: content complete, awaiting the user's review.** The site foundation is done, and so are four sections of the home page: banner, header and hero (built from Figma node `61:88`, `Desktop`), the "O nama" teaser, the partner logo strip "Tvrtke koje nam vjeruju", the "Naše usluge" section, the "Galerija" carousel, the "Česta pitanja" FAQ, the "Javite nam se" contact section with the shared inquiry form, and the global **footer** (the last seven built from user reference images). Further home sections will come from the user's reference images. The form's sending (Web3Forms) is **not connected yet** (user decision).
 
 Not committed yet. The user asked to wait with the commit until the whole Početna page is finished.
 
@@ -129,10 +129,11 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 
 ### Naše usluge (home only): `src/components/home/Services.astro`
 - Built from the user's reference ("Construction Services": a heading and a list card on the left, two photos plus the active service's text on the right).
+- **Heading (user decision, same pattern as O nama and Galerija):** `.eyebrow .eyebrow--accent` "Usluge" (`#services-eyebrow`) → 16px → h2 "Sve na jednom mjestu" (`.services__title`, wraps to 2 lines). The h2 used to be "Naše usluge". The tab list is labelled by the eyebrow (`aria-labelledby="services-eyebrow"`), so screen readers announce it as "Usluge"; the section is still labelled by the h2.
 - `<section class="services" aria-labelledby="services-title">`, background `--color-primary-shade` (Primary mixed with 6% Dark). The list card is plain `--color-primary`, which replaces the reference's white card on grey (no white in the palette, user decision). `padding-block: var(--section-padding-y)`.
-- `.container` grid: `minmax(0, 5fr) minmax(0, 7fr)`, 64px gap (`--space-16`), `align-items: start`. At 1440: left 448px, right 628px. The section is ~772px tall.
+- `.container` grid: `minmax(0, 5fr) minmax(0, 7fr)`, 64px gap (`--space-16`), `align-items: start`. At 1440: left 448px, right 628px. The section is ~864px tall (~772px before the eyebrow and the 2-line h2).
 - **Left:**
-  - `h2` "Naše usluge": one line, one colour (user decision; the reference's two-tone two-line heading was dropped).
+  - eyebrow "Usluge" + `h2` "Sve na jednom mjestu" in one colour (user decision; the reference's two-tone heading was dropped).
   - Lead below it, 16px gap, 1rem, `--color-dark-80`, max 360px.
   - Then the list card: 40px gap, `--radius`, padding 8px / 24px.
 - **Service list = vertical tabs (WAI-ARIA tabs pattern):**
@@ -160,8 +161,153 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - `sizes="(min-width: 1188px) 680px, 60vw"`: the 4:5 crop of a landscape photo needs ~680px of source width per 306px slot.
 - The whole `.services__inner` has `data-reveal`.
 
+### Galerija carousel (home only): `src/components/home/Gallery.astro`
+- Built from the user's reference ("Naši projekti": heading + "Vidi sve projekte" link, a strip of portrait cards with the 4th cut off by the screen edge, dots bottom-left, ← → bottom-right). Sits after Services, inside `.cover`.
+- **Restyled from a second reference** (dark "Naš rad / Od utovara do isporuke" section). User decisions:
+  - Dark background; layout unchanged (head row, strip, dots left, arrows right)
+  - photos stay **clean until hover** (the reference shows tags/titles at rest; we don't), and the hover cover effect is **exactly as before**
+  - head: `.eyebrow` "Galerija" (Light) → 16px → h2 "Od utovara do isporuke" → 16px → lead (max 600px, `--color-primary-80`). "Vidi više" stays on the right, bottom-aligned with the lead (`align-items: flex-end`), in the new `light` TextLink variant.
+  - arrows: 52px circles (`--carousel-arrow-size` = `--button-height`), 12px apart, 1px `--color-primary-60` border, Primary icon (20px). Hover: Primary fill + Dark icon (the icon colour switches in one step at the midpoint, like `Button`/footer, so it never blinks; measured worst frame 3.8:1). Disabled (at an end): `--color-primary-20` fill, no border, `--color-primary-60` icon, as the reference's grey arrow.
+  - dots: active Primary, inactive `--color-primary-30` (same sizes)
+  - photo corners stay 4px
+- **User decisions:**
+  - heading `h2` "Galerija", link "Vidi više" → `/galerija` (the h2 later became "Od utovara do isporuke", see the restyle above)
+  - 8 images, so there are 6 stop positions = 6 dots, as in the reference
+  - hover shows tag + title + one sentence; cards are **not** clickable
+  - section background: Accent was tried first, then Primary, now **Dark** (restyle)
+  - arrows move one card and dim at the ends (no wrap, no autoplay)
+  - mouse drag; trackpad/touch swipe allowed; dots are indicators only
+- `<section class="gallery">`, `--color-dark` background, Primary text, `--focus-color: var(--color-light)`. `padding-block: var(--section-padding-y)`. ~946px tall at 1440. Sections now go Services (tint) → Galerija (dark) → FAQ (tint).
+- **Geometry** (the section is `container-type: inline-size`, so `100cqi` = viewport width):
+  - `--gallery-content` = the `.container` width, `--gallery-bleed` = the side gutter, `--gallery-card` = (content − 2 × 24px gap) / 3.
+  - At 1440: cards 364 × 455 (4:5), gap 24. Cards 1–3 exactly fill 150–1290px; the 4th starts at 1314 and is cut by the screen edge.
+  - The strip `<ul class="gallery__track">` is full width, with `padding-inline` and `scroll-padding-inline` = bleed. At rest it looks exactly like the reference. When scrolled, earlier cards stay visible in the left gutter instead of being cut at the container edge.
+  - At the end the last card stops at the container's right edge (max scroll = 5 cards → 6 positions).
+  - Head row: flex, h2 left, link right, vertically centred. 48px (`--space-12`) to the strip, 40px (`--space-10`) from the strip to the controls.
+- **Scrolling:** native `overflow-x: auto` + `scroll-snap-type: x mandatory`, each card `scroll-snap-align: start`, scrollbar hidden.
+- **Script (in the component):**
+  - `step` = distance between two cards; `positions` = reachable stops (`round(maxScroll / step) + 1`). Extra dots get `hidden`, so if the responsive pass changes how many cards are visible, the dots stay right automatically.
+  - Arrows: `scrollTo` ±1 step (smooth; instant with reduced motion). `disabled` at the ends (opacity `--opacity-disabled`).
+  - Dots and arrow state update on `scroll` (rAF-throttled) and `resize`.
+  - **Mouse drag:** pointer events, mouse only (touch and trackpad use native scroll).
+    - After 4px of movement it captures the pointer and adds `.is-dragging` (snap off, `grabbing` cursor, no text selection, captions hidden).
+    - On release, a drag of more than 15% of a card moves on in that direction; a shorter one returns to the nearest card.
+    - Snap switches back on at `scrollend`, with a 700ms timeout fallback for Safari.
+    - Images have `draggable="false"`.
+  - Verified with puppeteer at 1440×900 (no horizontal page scroll):
+    - rest: prev disabled, dot 1
+    - next ×2: 776px, dot 3
+    - 150px drag: 1164px, dot 4
+    - next to the end: 1940px, dot 6, next disabled
+    - prev: 1552px
+- **Card:** `<figure tabindex="0">` with the `<Image>` and a `<figcaption>` overlay.
+  - Hover **or keyboard focus** fades in `--color-overlay-card` (Dark 70%) over `--duration-overlay` (300ms), and the caption block slides up 16px.
+  - Caption, bottom-left with 24px padding: `.eyebrow` service tag (Light), title (`--text-lg` SemiBold), sentence (1rem, `--color-primary-80`).
+  - The focus ring is inset, because the scroller clips anything outside the card. It's Primary (`--focus-color` set on the focused card), because it sits on the dark overlay.
+  - The caption sets its own `color: var(--color-primary)` (the section text is Dark).
+  - Reduced motion: no transitions.
+- **Controls:**
+  - Dots: `aria-hidden`, 8px; the active one is 12px Primary, inactive ones `--color-primary-30`. Round, as in the reference.
+  - Arrows: round 52px `<button>`s ("Prethodna fotografija" / "Sljedeća fotografija") with 20px `arrow-left` / `arrow-right` icons; the right circle's edge lines up with the container edge. Hover fills them and nudges the glyph 3px. See the restyle notes above for colours.
+  - Without JS the controls are hidden (`html:not(.js)`) and the strip still scrolls.
+- **Images are placeholders:** the hero van photo with 4 CSS crops, cycled so neighbours differ:
+  - `object-position` 70% (the van), 0% (docks), 100% (van side), 40% (dock + van front)
+  - same `widths` as the other sections, so no new image files
+  - `sizes="(min-width: 1188px) 805px, 70vw"`: a 4:5 crop of the landscape photo needs ~805px of source width per 364px card
+- The whole section content (head + strip + controls) has one `data-reveal`.
+
+### Česta pitanja / FAQ (home only): `src/components/home/Faq.astro`
+- Built from the user's reference (centred "FAQ" heading, a narrow list of questions with dotted dividers and a chevron on the right, "Can't find your answer here? Get in touch." below). Sits after Galerija, inside `.cover`.
+- **User decisions:**
+  - h2 "Česta pitanja", 7 questions, price/quote questions first, then other topics
+  - bottom line "Niste pronašli odgovor? Javite nam se." with the link to `/kontakt`
+  - narrow centred column, dotted dividers, `--color-primary-shade` background (sections alternate: Services shade → Galerija primary → FAQ shade)
+  - a chevron that flips when open; one question open at a time; all closed on load
+  - open question + chevron in Accent (also on hover); the answer slides open smoothly
+- Layout: centred h2 → 48px → list (`max-width: var(--faq-width)`, 760px, centred) → 48px → the centred bottom line (`--color-dark-80`, default Accent `TextLink`). `padding-block: var(--section-padding-y)`. ~854px tall at 1440 with everything closed.
+- **Markup:** native `<details class="faq__item" name="cesta-pitanja">` + `<summary class="faq__question">` (question text + 20px `chevron-down`) + `<div class="faq__answer"><p>`.
+  - Question: `--text-lg` Medium, 20px top/bottom padding, grid `1fr auto`. The native marker is hidden.
+  - Answer: 1rem, `--color-dark-80`, 24px bottom padding and 48px right padding (keeps it clear of the chevron).
+  - Dividers: `1px dotted var(--color-dark-30)` between items (none above the first or below the last, as in the reference).
+- **Without JS:** plain `<details>`. The shared `name` makes them exclusive natively (one open at a time), instant.
+- **Script (in the component):**
+  - removes `name` (otherwise the browser snaps the other item shut without animation) and handles exclusivity itself
+  - on a summary click: closes the open item and opens the clicked one, animating the `.faq__answer` height with WAAPI over `--duration-accordion` (300ms, `--ease-out` curve)
+  - while closing, `.is-closing` flips the question colour and chevron back right away; `open` is removed when the animation ends
+  - clicking again mid-animation reverses from the current height
+  - reduced motion: no animation, instant exclusive toggle
+  - **Gotcha:** the build's CSS minifier rewrites `300ms` as `.3s`, so the script parses the token's unit (`ms` or `s`). Any future script that reads a duration token must do the same.
+  - Verified with puppeteer at 1440×900: open 1 → open 3 (1 animates shut: 101 → 41 → 12 → 3px, while 3 grows 45 → 66 → 75px) → close 3 → Enter on 2 opens it → Space closes it. No horizontal scroll.
+- **JSON-LD:** the component outputs a `FAQPage` script with the same questions and answers. Keep it in sync automatically by editing only the `questions` array. (Google currently shows FAQ rich results mainly for authoritative sites; the markup is still valid and harmless.)
+- The whole `.faq__inner` (heading + list + bottom line) has one `data-reveal`.
+
+### Javite nam se (home only): `src/components/home/Contact.astro`
+- Built from the user's reference ("Get in Touch": blue left half with heading, lead and a 2×2 info block; light right half with a "Contact Details" form card). Last section inside `.cover`.
+- **User decisions:** full-bleed halves; left half `--color-accent`; heading "Javite nam se"; cards Telefon / Email / WhatsApp / Adresa (WhatsApp replaces the reference's business hours, which aren't decided yet).
+- Background: `linear-gradient(to right, accent 50%, primary-shade 50%)`, so the colour split is at the screen centre.
+- **Each block is centred in its own colour half** (user decision; this deliberately breaks the 1140px container alignment, and `.contact__inner` doesn't use `.container`):
+  - grid `repeat(2, minmax(0, var(--contact-half-max)))` + `justify-content: center`: two columns that meet at the split, each at most 720px (half the 1440 design)
+  - each block has `justify-self: center` and `width: min(<block width>, 100% − 2 × 48px)`: the intro is 480px (`--contact-intro-width`), the form card 522px (`--contact-card-width`)
+  - **wide screens (user decision, "cap the distance"):** the halves stop growing at 720px, so above 1440 the blocks stay as far from the split as at 1440 instead of drifting apart
+  - **narrow screens:** at least 48px between each block and the split / screen edge; the blocks narrow instead
+  - vertically both are centred (`align-items: center`); the section keeps its 96px padding (~820px tall)
+  - text inside the intro stays left-aligned; the submit button stays right-aligned in the card
+  - verified with puppeteer:
+
+    | Viewport | Intro (left / width / gap to split) | Card (gap to split / width / gap to edge) |
+    |---|---|---|
+    | 1100 | 48 / 454 / 48 | 48 / 454 / 48 |
+    | 1440 | 120 / 480 / 120 (exact centre) | 99 / 522 / 99 (exact centre) |
+    | 1920 | 360 / 480 / 120 (capped) | 99 / 522 / 339 (capped) |
+
+    No horizontal scroll; both blocks' vertical centres at the same height.
+- **Left** (Primary text, `--focus-color: var(--color-primary)`): h2 → 16px → lead (max 440px) → 40px → the info block.
+  - The info block is a `<ul>` 2×2 grid on `--color-primary-12`, `--radius`, hairlines (`--color-primary-20`) between the cells.
+  - Each cell is a whole-cell link (tel / mailto / WhatsApp / Google Maps, the last two in a new tab with a hidden note): 20px icon → label (SemiBold) → value (`--text-small`). Hover: a lighter tint.
+- **Right:** a Primary card (32px padding, `--radius`), title "Pošaljite upit" (`<p>`, `--text-lg` SemiBold), then `<ContactForm idPrefix="upit" />`.
+- The whole `.contact__inner` has one `data-reveal`.
+
+### Inquiry form (shared): `src/components/ContactForm.astro`
+- **User decision:** one shared form, used on the home page now and on `/kontakt` later. This deviates from PRD §7 ("only on /kontakt").
+- **Fields** (2-column grid, 20px row gap / 16px column gap):
+  - Ime i prezime* (`name`)
+  - Email* (`email`)
+  - Telefon (`phone`, **optional**, user decision; labelled "(neobavezno)"; loose pattern `[0-9+()/ -]{6,20}`)
+  - Naslov* (`naslov`, user decision; it becomes the email subject "Novi upit: <naslov>")
+  - Poruka* (`message`, full width, textarea)
+  - consent checkbox* with a link to `/politika-privatnosti`
+- Hidden: `subject`, `from_name`, and the honeypot `botcheck` (visually hidden, `tabindex="-1"`). The names already follow Web3Forms.
+- Inputs: 48px (`--input-height`), 1px `--color-input-border`, Primary fill, `--radius`, placeholders in `--color-dark-60`. Hover: darker border. Focus: Accent border + focus ring.
+- **Validation** (`novalidate` + the script, so the messages are Croatian):
+  - on submit every field is checked; errors show under the field (`circle-alert` icon + text), linked with `aria-describedby`, `aria-invalid="true"` on the control, focus on the first invalid field
+  - after the first submit, fields re-check while typing
+  - messages: "Upišite ime i prezime." / "Upišite email adresu." / "Upišite ispravnu email adresu, npr. ivan@email.com." / "Upišite ispravan broj telefona." / "Upišite naslov upita." / "Napišite poruku." / "Za slanje upita potrebna je vaša privola."
+  - **no red in the palette**, so errors use `--color-error` (= Dark) with a 2px border and the icon. Change that one token if a red is approved.
+- **Sending is NOT connected** (user: "ignore it for now, just create the form"). A valid submit sets the subject and shows the fallback in the `role="status"` region: "Slanje upita trenutno nije moguće. Nazovite nas na 099 213 2638 ili nam pišite na gajatrans2025@gmail.com." (with links). So no visitor is told their message was sent. The TODO in the script lists the Web3Forms steps (access key input, hCaptcha, fetch POST, "Šaljem…" state, success message, reset).
+- `idPrefix` prop keeps the ids unique if the form ever appears twice on one page.
+- Verified with puppeteer: empty submit → 5 errors, focus on "Ime i prezime"; "ivan@" → the invalid-email message; valid → no errors, subject "Novi upit: Selidba stana", fallback shown.
+
+### Footer (global, every page): `src/components/Footer.astro`
+- Built from the user's reference ("RoofPro Services" footer). Rendered by `BaseLayout` after `<main>`. Dark background, Primary text, `--focus-color: var(--color-light)`. The footer is an inline-size container (for the wordmark size).
+- **Top**, a 3-column grid `5fr 3fr 4fr` (the reference is ≈ 6/3/3; the contact column is wider so the email fits on one line):
+  - tagline "Vaš pouzdan partner za prijevoz, dostavu i selidbe diljem Hrvatske." (`--color-primary-60`, max 340px) + **Facebook and Instagram** round icons (40px circles on `--color-primary-12`; hover Primary fill). Their URLs are **placeholders** (`site.social` in `site.ts`, `'#'`).
+  - "Brzi linkovi" (`.eyebrow`) + the `navItems` as uppercase `--text-small` links (`--color-primary-60`, hover Primary + underline), in a `<nav aria-labelledby>`
+  - "Kontakt" (`.eyebrow`) + Email / Telefon / Adresa: 40px icon circle, small label, value (the address on two lines). Whole items are links; hover fills the circle.
+  - **Icon circle hover fix (user-reported blink):** the circle fill fades (`ease-in-out`), but the icon colour switches in one step at the midpoint (`color 0s linear calc(var(--duration-fast) / 2)`), like the outline `Button`.
+    - Before, fill and icon faded together and met in the same grey halfway (measured 1:1 contrast with animations slowed 20×), so the icon vanished and reappeared on hover out.
+    - The worst frame is now 3:1. Don't put a normal colour fade back on `.footer__circle`, and use the same pattern for any future "fill + inverted icon" hover.
+- **Wordmark** "GAJA TRANS" (user decision: Poppins Bold, "TRANS" muted; it's Medium weight in `--color-primary-60` for the reference's two-tone look). `aria-hidden` (decorative).
+  - Size `--text-wordmark` = container width × 0.1655, so it spans exactly the container. Verified at 1100 / 1440 / 1920: text edges = container edges, no horizontal scroll.
+  - If the text, font or weight changes, re-tune the 0.1655 factor in `global.css`.
+- **Bottom bar:** hairline on top, "© <build year> GAJA TRANS j.d.o.o. · OIB 03762709970. Sva prava pridržana." left, "Politika privatnosti" right.
+
+### Text links (all sections): `src/components/TextLink.astro`
+- **User decision:** links look like the gallery reference: plain underlined text, **no arrow**. The arrow was also removed from "Više o nama" and "Saznaj više".
+- Medium 500 (was SemiBold), 1px underline with a 6px offset, 2px underline on hover. The colours stay as they were (Accent, darker on hover).
+- `variant` prop: `accent` (default, light sections), `inverse` (Primary text, unused for now) or `light` (Light #9DB3FF text that turns Primary on hover, for Dark sections; used by the Galerija "Vidi više").
+
 ### Other global pieces
-- `WhatsAppButton.astro`: fixed bottom-right, 56px **green circle with a white WhatsApp glyph** (the real WhatsApp look, user decision), `aria-label="Pišite nam na WhatsApp"`. Hover darkens the green and lifts the button 2px.
+- `WhatsAppButton.astro`: **removed (user decision). The component file is deleted and it no longer renders on any page.** It can be restored from git history. The `--color-whatsapp*` tokens are still in `global.css` but nothing uses them now. Was: fixed bottom-right, 56px **green circle with a white WhatsApp glyph** (the real WhatsApp look, user decision), `aria-label="Pišite nam na WhatsApp"`. Hover darkens the green and lifts the button 2px.
 - Skip link "Preskoči na sadržaj" → `#sadrzaj` (`<main>`). Visible on focus only.
 
 ## 3. Files created / modified
@@ -171,20 +317,25 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 | `astro.config.mjs` | `site` (placeholder `https://example.com`, TODO), `@astrojs/sitemap`, Astro Fonts API with local Poppins 500/600/700 and Noticia Text 400 (latin + latin-ext, each with its unicode-range) |
 | `package.json` / `package-lock.json` | Added `@astrojs/sitemap` |
 | `src/styles/global.css` | All tokens, reset, base, `.container`, `.visually-hidden`, `.eyebrow`, `.highlight`, reveal CSS |
-| `src/data/site.ts` | Company info, phone/WhatsApp/email/address (+ Maps URL), `navItems`, `services` (now `{ name, slug }` objects, plus `Service`/`ServiceSlug` types) |
-| `src/layouts/BaseLayout.astro` | `<html lang="hr">`, SEO/OG/Twitter/canonical, JSON-LD `MovingCompany`, fonts, skip link, Banner, Header, `<main id="sadrzaj">`, WhatsApp button, reveal script |
+| `src/data/site.ts` | Company info, phone/WhatsApp/email/address (+ Maps URL), `social` (placeholder URLs), `navItems`, `services` (now `{ name, slug }` objects, plus `Service`/`ServiceSlug` types) |
+| `src/layouts/BaseLayout.astro` | `<html lang="hr">`, SEO/OG/Twitter/canonical, JSON-LD `MovingCompany`, fonts, skip link, Banner, Header, `<main id="sadrzaj">`, Footer, WhatsApp button, reveal script |
 | `src/components/Banner.astro` | Top contact bar |
 | `src/components/Header.astro` | Header, nav and scroll behaviour |
 | `src/components/Button.astro` | Primary/outline button |
-| `src/components/WhatsAppButton.astro` | Floating WhatsApp link |
+| ~~`src/components/WhatsAppButton.astro`~~ | Floating WhatsApp link (deleted, user decision) |
 | `src/components/icons/Icon.astro` | Inline SVG icons: `phone`, `mail`, `map-pin`, `arrow-right` (Lucide), `whatsapp` (Simple Icons) |
 | `src/components/home/Hero.astro` | Home hero (H1 now takes its size from the global scale) |
 | `src/components/home/About.astro` | Home "O nama" teaser: text + points + link, portrait image |
-| `src/components/TextLink.astro` | Accent text link with an underlined label and a trailing arrow |
+| `src/components/TextLink.astro` | Underlined text link (no arrow), `accent` / `inverse` / `light` variants |
 | `src/components/home/Partners.astro` | Home partner logo marquee "Tvrtke koje nam vjeruju" |
 | `src/components/home/Services.astro` | Home "Naše usluge": vertical service tabs + crossfading panels |
+| `src/components/home/Gallery.astro` | Home "Galerija": scroll-snap carousel with hover captions, dots, arrows, mouse drag |
+| `src/components/home/Faq.astro` | Home "Česta pitanja": animated `<details>` accordion + FAQPage JSON-LD |
+| `src/components/home/Contact.astro` | Home "Javite nam se": Accent info half + form card |
+| `src/components/ContactForm.astro` | Shared inquiry form with Croatian validation (sending not connected yet) |
+| `src/components/Footer.astro` | Global footer: tagline + socials, quick links, contact, wordmark, legal bar |
 | `src/assets/logos/*.svg` | 8 placeholder partner logos (fictional brands), to be replaced |
-| `src/pages/index.astro` | Home page: BaseLayout + Hero + `<div class="cover">` holding `.intro-screen` (About + Partners as one screen), Services (and all future sections) |
+| `src/pages/index.astro` | Home page: BaseLayout + Hero + `<div class="cover">` holding `.intro-screen` (About + Partners as one screen), Services, Gallery, Faq, Contact |
 | `AGENTS.md` | Added rule 7: the typography scale (user decision) |
 | `src/assets/hero-van.png` | Hero photo (the user's original, renamed from "White Cargo Van at Warehouse Docks.png") |
 | `src/assets/gaja-logo.png` | "G" logo mark from Figma (41×41) |
@@ -226,7 +377,21 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - `--screen-gap`: 24–48px
   - `--about-media-min` (320px)
   - See "About + logos = one screen".
-- **Icons added (Lucide v1.73):** `arrow-up-right`, `truck`, `sofa`, `warehouse`, `trees`, `sparkles`, `circle-plus`.
+- **Icons added (Lucide v1.73):** `arrow-up-right`, `truck`, `sofa`, `warehouse`, `trees`, `sparkles`, `circle-plus`, `arrow-left` (same 16px crop as `arrow-right`), `chevron-down`.
+- **Added for the contact section, form and footer:**
+  - colours: `--color-dark-60` (placeholders, optional label), `--color-input-border` (Dark 20%), `--color-primary-12` / `--color-primary-20` / `--color-primary-60` (tints of Primary on Accent/Dark), `--color-error` (= Dark, no red in the palette)
+  - sizes: `--input-height` (48px), `--social-size` (40px circles), `--text-wordmark` (footer wordmark, scales with the container)
+  - contact layout: `--contact-half-max` (720px), `--contact-intro-width` (480px), `--contact-card-width` (522px)
+  - icons: `circle-alert` (Lucide), `facebook` and `instagram` (Lucide v0.460; brand icons were dropped in later Lucide versions)
+  - `--radius-round` is also used for the footer icon circles (round in the reference)
+- **Added for the FAQ:** `--faq-width` (760px), `--duration-accordion` (300ms). `--color-dark-30` is also used for the dotted dividers.
+- **Added for the Galerija carousel:**
+  - `--color-primary-30` (inactive dots on Dark), `--color-overlay-card` (Dark 70%, hover overlay on images)
+  - `--carousel-arrow-size` (52px round arrows), `--dot-size` (8px), `--dot-size-active` (12px)
+  - removed in the dark restyle: `--control-size` and `--opacity-disabled` (unused now)
+  - `--link-underline` (1px), `--link-underline-hover` (2px), `--link-underline-offset` (6px), used by `TextLink`
+  - `--duration-overlay` (300ms)
+  - `--radius-round` is now also used for the carousel dots (they're round in the reference).
 - **`services` in `site.ts`** is now a list of `{ name, slug }`. The slug is the anchor id of each service on `/usluge`; **the Usluge page must use these ids** (`prijevoz-i-dostava`, `selidbe`, `skladistenje`, `uredenje-okolisa`, `ciscenje-prostora`, `dodatne-usluge`), because the home "Saznaj više" links point to them.
 - **Utilities added:** `.eyebrow--accent` (Accent eyebrow for light sections, where Light is too faint), `.text-small`.
 - **Spacing added:** `--space-24` 96, `--space-30` 120, and `--section-padding-y` (= `--space-24`), the vertical padding of a standard content section.
@@ -253,10 +418,10 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - icon entries can set their own `viewBox` (`arrow-right` is cropped to `4 4 16 16` so it fills its box like the Figma arrow)
   - to add an icon, copy the SVG inner markup from `lucide-static`
 - `TextLink.astro`:
-  - props: `href`, `class`
-  - Accent, 1rem SemiBold, underlined label (1px, 4px offset), 16px arrow after the label with an 8px gap
-  - hover: `--color-accent-hover` and a 3px arrow nudge, like `Button`
-  - for light backgrounds only
+  - props: `href`, `variant?: 'accent' | 'inverse' | 'light'` (default `accent`), `class`
+  - 1rem Medium, underlined (1px, 6px offset), **no arrow** (user decision)
+  - hover: the underline grows to 2px; `accent` also darkens to `--color-accent-hover`
+  - `accent` for light backgrounds, `inverse` (Primary) for Accent/Dark backgrounds
 - `BaseLayout.astro` props: `title`, `description`, `ogImage?` (defaults to a 1200px JPG of the hero photo).
 
 ## 5. Design decisions and deviations
@@ -272,7 +437,8 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 - **Fonts:** Astro Fonts API with local woff2 files (user's choice over @fontsource packages). Only Poppins 500 and 700 are preloaded.
 - **Header button** renders ~2px wider than Figma (8px icon gap vs ~6px in Figma; the PRD says 8–10px).
 - **Fixed header** gets a soft shadow (`--color-shadow`) so it separates from the content. Figma doesn't show this state.
-- **WhatsApp button is a green circle with a white glyph** (user decision). This deliberately breaks PRD §4.1 (no WhatsApp green, no pure white) and §4.3 (no round shapes), and PRD §5 still describes the old accent/primary version. The exception is limited to this one component through dedicated tokens.
+- **Floating WhatsApp button removed** (user decision). This deviates from PRD §5, which lists it on every page. WhatsApp is still reachable through the contact card on the home page.
+- **WhatsApp button (now deleted) was a green circle with a white glyph** (user decision). This deliberately breaks PRD §4.1 (no WhatsApp green, no pure white) and §4.3 (no round shapes), and PRD §5 still describes the old accent/primary version. The exception is limited to this one component through dedicated tokens.
 - **Banner + header + hero = 100% of the viewport height**, with the photo positioned as a full-viewport background behind them (user decision, see §2). Figma uses a fixed 720px hero with a bottom-anchored crop.
 - **Favicon:** only 32/48px versions, because the source logo is 41px. No apple-touch-icon yet.
 - **Typography scale** (user decision, recorded in AGENTS.md rule 7) replaces the PRD §4.2 heading sizes. The hero H1 went from 52px to 3.815rem (~61px), and the eyebrow from 13px to 0.8rem (12.8px).
@@ -287,12 +453,30 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - muted with grayscale + opacity, full on hover (user decision)
   - the placeholder SVGs use Arial/Helvetica for their wordmarks, because they stand in for third-party logos, which have their own typefaces, not site typography
 - **Services vs reference:**
-  - a single-colour, one-line h2 "Naše usluge" (user decision)
+  - eyebrow "Usluge" + a single-colour h2 "Sve na jednom mjestu" (user decision)
   - all 6 services instead of 4 (user decision)
   - tinted section + Primary card instead of a white card on grey (palette)
   - the panel title is a `<p>` with `--text-lg`, not an h3 (AGENTS.md rule 7)
   - the link reads "Saznaj više →" (existing `TextLink`) instead of the reference's small uppercase "VIEW SERVICE"
   - both images are the van photo (user decision)
+- **Galerija vs reference:**
+  - heading "Galerija" and link "Vidi više" instead of "Naši projekti" / "Vidi sve projekte" (user decision)
+  - 8 cards to get the reference's 6 dots (user decision)
+  - the strip is full width: at rest it's identical to the reference, but scrolled-past cards stay visible in the left gutter
+  - **second reference (dark):** clean photos at rest instead of always-visible tags/titles; the hover overlay kept; dots kept instead of the reference's "06 —— 06" progress bar; arrows stay below the strip (the reference has them in the head row); "Vidi više" without an arrow (user kept the text); 4px corners instead of ~12px; the lead has no "[BROJ]" number
+- **FAQ vs reference:**
+  - heading "Česta pitanja" instead of "FAQ" (user decision)
+  - Accent open/hover state (user decision); the reference shows no open state
+  - the questions use `--text-lg` (the reference ratio of heading to question text)
+- **Inquiry form on the home page** (shared with `/kontakt`): deviates from PRD §7 ("only on /kontakt"), user decision. The fields deviate too: Telefon is optional and "Naslov" was added (user decision).
+- **Contact vs reference:** WhatsApp replaces "Business hours"; the 4 info cells are links; the form card is Primary on the tinted half instead of white on grey (palette).
+- **Contact section ignores the container** (user decision): both blocks are centred in their colour halves, not aligned to the 1140px container like every other section.
+- **Footer vs reference:**
+  - "GAJA TRANS" wordmark with "TRANS" in Medium + 60% Primary (the reference's lighter second word)
+  - "Brzi linkovi" are the nav pages (no FAQ link)
+  - the bottom bar has the OIB (legal requirement) and only "Politika privatnosti" (no Terms/Cookies pages exist)
+  - columns 5/3/4 instead of ≈ 6/3/3 so the email fits on one line
+- **Text links lost their arrow** and are now Medium weight everywhere (user decision, following the gallery reference). The colours didn't change.
 - **About image** is the hero photo cropped to 4:5 with CSS (`object-position`), not with Sharp. Astro's `position` prop only supports keywords, and `right` would cut off the front of the van.
 
 ## 6. Content
@@ -315,8 +499,8 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 | O nama image alt | Bijeli dostavni kombi ispred skladišta | placeholder (it describes the stock photo; don't claim it's the client's van) |
 | Partners title | Tvrtke koje nam vjeruju | agreed (user picked it) |
 | Partner logos | Kvadra, Sjever, Dravia, Lumio, Orbis, Brodmar, Ventis, Panora | placeholder, fictional brands; the user will supply real logos |
-| Services H2 | Naše usluge | agreed |
-| Services lead | Od jedne pošiljke do kompletne selidbe – sve što vam treba, na jednom mjestu. | placeholder |
+| Services eyebrow / H2 | Usluge / Sve na jednom mjestu | eyebrow agreed; H2 written by agent at the user's request (replaces "Naše usluge") |
+| Services lead | Od jedne pošiljke do kompletne selidbe – jedan tim za sve što vam treba. | placeholder (reworded so it doesn't repeat the H2) |
 | Prijevoz i dostava | Prevozimo i dostavljamo pošiljke svih veličina – od jednog paketa do punog kombija robe. Dogovorimo termin koji vam odgovara i robu sigurno dovezemo na adresu, bilo gdje u Hrvatskoj. | placeholder |
 | Selidbe | Selimo stanove, kuće i urede od pakiranja do posljednje kutije. Namještaj pažljivo rastavljamo, štitimo i ponovno slažemo, a vi se brinete samo o tome gdje će što stajati. | placeholder |
 | Skladištenje | Trebate privremeno spremiti namještaj, robu ili opremu? Vaše stvari čuvamo u sigurnom i suhom prostoru – na kraće ili dulje vrijeme – i dostavljamo ih kad vam zatrebaju. | placeholder |
@@ -325,6 +509,38 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 | Dodatne usluge | Odvoz glomaznog otpada, pražnjenje podruma i tavana, montaža namještaja i druge sitne usluge. Recite nam što vam treba, a mi ćemo pronaći rješenje. | placeholder (the client must confirm which extra services they really offer) |
 | Services link | Saznaj više → `/usluge#<slug>` | agreed (the page doesn't exist yet) |
 | Services image alts | Utovarne rampe skladišta / Bijeli dostavni kombi ispred skladišta | placeholder (describe the stock photo) |
+| Galerija eyebrow / H2 / link | Galerija / Od utovara do isporuke / Vidi više → `/galerija` | agreed (the page doesn't exist yet) |
+| Galerija lead | Selidbe, dostave i skladištenje za privatne i poslovne klijente. Pogledajte kako radimo na terenu. | agreed (adapted from the reference, without the number) |
+| Galerija card 1 | **Selidbe** – Selidba stana u Osijeku – Pakiranje, rastavljanje i ponovno slaganje namještaja – sve u jednom danu. | placeholder (invented example project) |
+| Galerija card 2 | **Skladištenje** – Privremeno skladištenje opreme – Uredska oprema na sigurnom tijekom renovacije, dostavljena čim je zatrebala. | placeholder |
+| Galerija card 3 | **Prijevoz i dostava** – Dostava namještaja kupcima – Preuzimanje iz trgovine i dostava na kućnu adresu, uz unos u stan. | placeholder |
+| Galerija card 4 | **Uređenje okoliša** – Uređenje dvorišta obiteljske kuće – Košnja, orezivanje živice i odvoz zelenog otpada u jednom dolasku. | placeholder |
+| Galerija card 5 | **Čišćenje prostora** – Čišćenje stana nakon selidbe – Temeljito čišćenje praznog stana prije predaje novim stanarima. | placeholder |
+| Galerija card 6 | **Dodatne usluge** – Pražnjenje podruma i tavana – Razvrstavanje, iznošenje i odvoz glomaznog otpada na zbrinjavanje. | placeholder |
+| Galerija card 7 | **Selidbe** – Selidba ureda preko vikenda – Preseljenje cijelog ureda bez prekida u radu tvrtke. | placeholder |
+| Galerija card 8 | **Prijevoz i dostava** – Redovita dostava za trgovine – Tjedna dostava robe iz skladišta na prodajna mjesta diljem Slavonije. | placeholder |
+| Galerija image alts | Bijeli dostavni kombi ispred skladišta / Utovarne rampe skladišta / Bočna strana bijelog dostavnog kombija / Utovarna rampa i prednji dio dostavnog kombija | placeholder (they describe the stock photo crops) |
+| Galerija arrows (aria-label) | Prethodna fotografija / Sljedeća fotografija | written by agent |
+| FAQ H2 | Česta pitanja | agreed |
+| FAQ 1 | Kako se formira cijena usluge? – Cijena ovisi o vrsti usluge, udaljenosti, količini stvari i broju ljudi koji su potrebni za posao. Nakon kratkog razgovora ili nekoliko fotografija pošaljemo vam točnu ponudu, bez skrivenih troškova. | placeholder |
+| FAQ 2 | Je li procjena troškova besplatna? – Da. Ponuda je besplatna i ni na što vas ne obvezuje. Javite nam se telefonom, putem WhatsAppa ili kontakt obrasca i odgovorit ćemo vam u najkraćem roku. | placeholder (client must confirm quotes are free) |
+| FAQ 3 | Kako mogu platiti uslugu? – Uslugu možete platiti gotovinom ili uplatom na račun. Tvrtkama izdajemo račun s njihovim podacima, a način plaćanja dogovaramo unaprijed, zajedno s ponudom. | placeholder (client must confirm payment methods) |
+| FAQ 4 | Radite li i izvan Osijeka i okolice? – Da. Prijevoz, dostavu i selidbe obavljamo diljem Hrvatske. Za duže relacije termin i cijenu dogovaramo unaprijed kako bi sve proteklo bez iznenađenja. | placeholder (service area still to be confirmed, PRD §13) |
+| FAQ 5 | Koliko unaprijed trebam rezervirati termin? – Za selidbe preporučujemo da nam se javite barem tjedan dana ranije, osobito krajem mjeseca. Manje prijevoze i dostave često možemo odraditi već za dan ili dva. | placeholder (client must confirm lead times) |
+| FAQ 6 | Pakirate li stvari i rastavljate namještaj? – Da, na vaš zahtjev. Stvari pažljivo pakiramo, namještaj rastavljamo i na novoj adresi ponovno slažemo, a osjetljive predmete štitimo dekama i folijom. | placeholder |
+| FAQ 7 | Mogu li uz selidbu dogovoriti i čišćenje ili skladištenje? – Možete. Nakon selidbe očistit ćemo stari ili novi prostor, a stvari koje vam trenutno ne trebaju čuvamo u skladištu. Sve dogovarate s jednim timom i jednim kontaktom. | placeholder |
+| FAQ bottom line | Niste pronašli odgovor? Javite nam se. → `/kontakt` | agreed |
+| Contact H2 | Javite nam se | agreed |
+| Contact lead | Trebate prijevoz, selidbu ili neku drugu uslugu? Pošaljite nam upit i javit ćemo vam se s besplatnom ponudom. | agreed (the client must confirm quotes are free) |
+| Contact cards | Telefon 099 213 2638 / Email gajatrans2025@gmail.com / WhatsApp "Pošaljite nam poruku" / Adresa Nikole Šubića Zrinskog 32, 31220 Višnjevac | agreed |
+| Form card title / button | Pošaljite upit / Pošalji upit → | written by agent |
+| Form placeholders | npr. Ivan Horvat / npr. ivan@email.com / npr. 091 234 5678 / npr. Selidba stana / Opišite što vam treba: usluga, adresa, okvirni termin… | written by agent |
+| Consent | Slažem se s obradom osobnih podataka u skladu s Politikom privatnosti. | PRD §7 |
+| Form fallback | Slanje upita trenutno nije moguće. Nazovite nas na 099 213 2638 ili nam pišite na gajatrans2025@gmail.com. | written by agent (temporary, until Web3Forms) |
+| Footer tagline | Vaš pouzdan partner za prijevoz, dostavu i selidbe diljem Hrvatske. | agreed |
+| Footer headings | Brzi linkovi / Kontakt | written by agent |
+| Footer legal line | © <year> GAJA TRANS j.d.o.o. · OIB 03762709970. Sva prava pridržana. | agreed |
+| Social labels | GAJA TRANS na Facebooku / GAJA TRANS na Instagramu (visually hidden) | written by agent |
 
 ## 7. Open issues / TODOs
 
@@ -333,7 +549,6 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 - [ ] **Domain:** `site` in `astro.config.mjs` and `public/robots.txt` use `https://example.com`.
 - [ ] **Final logo:** an SVG would replace `gaja-logo.png` (41px raster) and allow a proper apple-touch-icon.
 - [ ] **Hover colours** are provisional (`--color-accent-hover`, banner link hover, outline fill).
-- [ ] **Footer** is not built (a placeholder comment sits in `BaseLayout.astro`).
 - [ ] **O nama teaser:**
   - replace the placeholder copy with the user's text
   - replace the van photo with a real client photo (change the import in `About.astro` and re-tune `object-position`)
@@ -349,8 +564,18 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - give each service its own photos (the `images` field per service in `Services.astro`)
   - the `/usluge#<slug>` links 404 until the Usluge page exists, and it must use the slugs from `site.ts` as section ids
 - [ ] **Galerija page:** `/galerija` is linked in the nav but doesn't exist yet (404). It's missing from PRD §2.1 and the §12.1 build order; ask the user where it fits and what it shows.
+- [ ] **Galerija section:**
+  - replace the 8 placeholder projects (photos and copy) with real ones (the `projects` array in `Gallery.astro`). With 3 visible cards, `n` cards give `n − 2` dots automatically.
+  - touch screens have no hover, so captions show there only on keyboard focus. Decide this in the responsive pass (e.g. always show a caption strip under `(hover: none)`), and set the cards per row there too (the `/ 3` in `--gallery-card`).
+  - `/galerija` 404s until the page exists
+- [ ] **FAQ:** the client must approve or replace all 7 questions and answers (especially free quotes, payment methods, service area and booking lead times). Edit only the `questions` array in `Faq.astro`; the JSON-LD follows it.
+- [ ] **Form sending (Web3Forms):** not connected, user decision. Follow the TODO in `ContactForm.astro` once the key exists (PRD §7: `.env` with `PUBLIC_WEB3FORMS_ACCESS_KEY`, a committed `.env.example`, hCaptcha, loading state, success message, reset).
+- [ ] **Error colour:** errors use Dark, because the palette has no red. Ask the user whether to approve a red (`--color-error`).
+- [ ] **Social links:** `site.social.facebook` / `instagram` are `'#'` placeholders. Replace them, or remove the icons if the client has no profiles.
+- [ ] **Contrast on Accent:** Primary on Accent is ~3.6:1. That's fine for the h2 but below WCAG AA (4.5:1) for the contact lead and card text. Mention it to the user if accessibility matters.
+- [ ] **Base path:** `astro.config.mjs` has `base: '/gaja-web'` (GitHub Pages), but internal links (`/kontakt`, `/galerija`, …) don't include it. Fix this site-wide, or drop it once the site moves to its own domain.
 - [ ] The remaining Početna sections, from the user's references.
-- [ ] **Commit:** not committed yet, per the user's request. Commit to `main` once Početna is finished.
+- [ ] **Commit:** not committed yet. The user wants to review first and will say when to commit to `main`.
 
 ## 8. Notes for the next agent
 
@@ -363,9 +588,15 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
 - **Fonts:** to add a weight, copy the latin and latin-ext woff2 files from the `@fontsource/<font>` npm tarball into `src/assets/fonts/` and add `...variants('<file>', <weight>)` in `astro.config.mjs`.
 - **Reveal:** hidden styles only apply under `html.js` with `prefers-reduced-motion: no-preference`, so without JS or with reduced motion everything stays visible.
 - **Tinted sections:** for a section that holds Primary cards (like Services), use `--color-primary-shade` as the section background, and `--color-border` for dividers.
+- **Carousel:** `Gallery.astro` has the only carousel script. If another page needs one (e.g. `/galerija`), move it into a shared component instead of copying it.
+- **Form:** reuse `<ContactForm idPrefix="kontakt" />` on `/kontakt`; don't copy it. It brings its own styles and script.
+- **Footer** is global (BaseLayout); pages need nothing extra.
+- **Accordion:** `Faq.astro` has the only accordion script. If `/usluge` or another page needs one, move it into a shared component.
+- **Duration tokens in JS:** the minifier turns `300ms` into `.3s`. Parse the unit (see `duration()` in `Faq.astro`).
 - **Tabs:** `Services.astro` has the only tab script. If another page needs tabs, move it into a shared component instead of copying it.
 - **Testing scroll behaviour (outdated note, kept for context):** with only Hero + About, a 1440×900 viewport can't scroll far enough for the cover to reach the top (max scrollY ≈ 845, so a 55px strip of the hero photo stays visible above About at the very bottom of the page). The header correctly stays `flow-hidden`. This goes away once more sections or the footer exist. At 1440×700 the full cycle was verified with puppeteer-core + Edge: flow (0) → flow-hidden (200) → fixed (max) → flow-hidden (400) → flow (0).
 - **Headings:** don't set `font-size` on `h1`/`h2`/`h3` in components; the global scale does it. For a small title inside a card or list, use a non-heading element with `--text-lg`.
 - **Light sections:** use `.eyebrow--accent`, `--color-dark-80` for body text, and `TextLink` for inline "more" links.
+- **Dev server:** a dev server the user started themselves may already be running on :4321 (`astro dev status` shows it, but `astro dev logs` can't read it). Don't stop it. To check a build, run `npx astro preview --port 4400` and open `http://localhost:4400/gaja-web/` (base path).
 - **Dev toolbar:** the floating pill at the bottom centre in dev screenshots is the Astro dev toolbar, not part of the site.
 - **Hex colours:** never write hex values in components. A grep for `#[0-9a-f]{3,6}` in `src/**/*.astro` currently returns nothing; keep it that way.

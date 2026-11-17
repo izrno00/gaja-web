@@ -1,62 +1,70 @@
 ---
 /**
- * Inline text link with a trailing arrow, for light sections
- * (e.g. "Više o nama →"). Accent colour, underlined label; on hover the
- * colour darkens and the arrow nudges right, like the primary Button.
+ * Inline text link ("Više o nama", "Saznaj više", "Vidi više").
+ * Plain underlined text, no arrow (user decision, styled after the gallery
+ * reference). On hover the underline gets thicker; the accent variant also
+ * darkens.
+ *
+ * Variants:
+ * - `accent` (default): Accent text, for light sections.
+ * - `inverse`: Primary text, for Accent/Dark sections.
+ * - `light`: Light (#9DB3FF) text, for Dark sections (e.g. home Galerija);
+ *   turns Primary on hover.
  */
-import Icon from './icons/Icon.astro';
-
 interface Props {
 	href: string;
+	variant?: 'accent' | 'inverse' | 'light';
 	class?: string;
 }
 
-const { href, class: className } = Astro.props;
+const { href, variant = 'accent', class: className } = Astro.props;
 ---
 
-<a href={href} class:list={['text-link', className]}>
-	<span class="text-link__label"><slot /></span>
-	<Icon name="arrow-right" size={16} strokeWidth={1.5} class="text-link__icon" />
+<a href={href} class:list={['text-link', `text-link--${variant}`, className]}>
+	<slot />
 </a>
 
 <style>
 	.text-link {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--button-gap);
+		display: inline-block;
 		font-size: var(--text-body);
-		font-weight: var(--weight-semibold);
+		font-weight: var(--weight-medium);
 		line-height: var(--leading-body);
-		color: var(--color-accent);
-		transition: color var(--duration-fast) ease;
-	}
-
-	.text-link__label {
 		text-decoration-line: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 4px;
+		text-decoration-thickness: var(--link-underline);
+		text-underline-offset: var(--link-underline-offset);
+		transition:
+			color var(--duration-fast) ease,
+			text-decoration-thickness var(--duration-fast) ease;
 	}
 
 	.text-link:hover {
+		text-decoration-thickness: var(--link-underline-hover);
+	}
+
+	.text-link--accent {
+		color: var(--color-accent);
+	}
+
+	.text-link--accent:hover {
 		color: var(--color-accent-hover);
 	}
 
-	.text-link :global(.text-link__icon) {
-		transition: transform var(--duration-fast) ease;
+	.text-link--inverse {
+		color: var(--color-primary);
 	}
 
-	.text-link:hover :global(.text-link__icon) {
-		transform: translateX(3px);
+	.text-link--light {
+		color: var(--color-light);
+	}
+
+	.text-link--light:hover {
+		color: var(--color-primary);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.text-link,
-		.text-link :global(.text-link__icon) {
+		.text-link {
 			transition: none;
-		}
-
-		.text-link:hover :global(.text-link__icon) {
-			transform: none;
 		}
 	}
 </style>

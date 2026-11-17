@@ -4,8 +4,10 @@
  * `size` prop (px) or from CSS on the parent.
  *
  * Sources:
- * - phone, mail, map-pin, arrow-right, arrow-up-right, truck, sofa,
- *   warehouse, trees, sparkles, circle-plus: Lucide v1.73 (ISC licence)
+ * - phone, mail, map-pin, arrow-left, arrow-right, arrow-up-right, truck, sofa,
+ *   warehouse, trees, sparkles, circle-plus, chevron-down, circle-alert: Lucide v1.73 (ISC licence)
+ * - facebook, instagram: Lucide v0.460 (ISC; brand icons were removed from
+ *   later Lucide versions)
  * - whatsapp: Simple Icons v16 (CC0)
  *
  * To add an icon, add an entry to `icons` below.
@@ -27,6 +29,12 @@ const icons = {
 	'map-pin': {
 		type: 'stroke',
 		body: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+	},
+	'arrow-left': {
+		type: 'stroke',
+		// Same 16px crop as arrow-right (carousel "previous" button).
+		viewBox: '4 4 16 16',
+		body: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
 	},
 	'arrow-right': {
 		type: 'stroke',
@@ -62,6 +70,22 @@ const icons = {
 	'circle-plus': {
 		type: 'stroke',
 		body: '<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>',
+	},
+	'chevron-down': {
+		type: 'stroke',
+		body: '<path d="m6 9 6 6 6-6"/>',
+	},
+	'circle-alert': {
+		type: 'stroke',
+		body: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+	},
+	facebook: {
+		type: 'stroke',
+		body: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
+	},
+	instagram: {
+		type: 'stroke',
+		body: '<rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>',
 	},
 	whatsapp: {
 		type: 'fill',

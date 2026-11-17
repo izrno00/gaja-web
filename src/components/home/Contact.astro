@@ -1,0 +1,197 @@
+---
+/**
+ * Home "Javite nam se" section (user reference: "Get in Touch").
+ * Full-bleed halves: left half Accent (h2, lead and 4 contact cards), right
+ * half tinted with the inquiry form on a Primary card. The colour split is
+ * at the centre of the screen, and each block is centred in its own half
+ * (user decision; this breaks the usual 1140px container alignment).
+ *
+ * The form is the shared ContactForm (also used on /kontakt later).
+ */
+import Icon, { type IconName } from '../icons/Icon.astro';
+import ContactForm from '../ContactForm.astro';
+import { site } from '../../data/site';
+
+interface InfoCard {
+	icon: IconName;
+	label: string;
+	lines: string[];
+	href: string;
+	/** Opens in a new tab (with a hidden note for screen readers). */
+	external?: boolean;
+}
+
+// Phone, email, WhatsApp, address (user decision; WhatsApp replaces the
+// reference's business hours, which aren't decided yet).
+const cards: InfoCard[] = [
+	{ icon: 'phone', label: 'Telefon', lines: [site.phone.display], href: site.phone.href },
+	{ icon: 'mail', label: 'Email', lines: [site.email], href: `mailto:${site.email}` },
+	{ icon: 'whatsapp', label: 'WhatsApp', lines: ['Pošaljite nam poruku'], href: site.whatsapp, external: true },
+	{
+		icon: 'map-pin',
+		label: 'Adresa',
+		lines: [site.address.street, `${site.address.postalCode} ${site.address.city}`],
+		href: site.address.mapsUrl,
+		external: true,
+	},
+];
+---
+
+<section class="contact" aria-labelledby="contact-title">
+	<div class="contact__inner" data-reveal>
+		<div class="contact__intro">
+			<h2 id="contact-title">Javite nam se</h2>
+			<p class="contact__lead">
+				Trebate prijevoz, selidbu ili neku drugu uslugu? Pošaljite nam upit i javit ćemo vam se s besplatnom
+				ponudom.
+			</p>
+
+			<ul class="contact__cards" role="list">
+				{
+					cards.map((card) => (
+						<li>
+							<a
+								class="contact__card"
+								href={card.href}
+								{...(card.external ? { target: '_blank', rel: 'noopener' } : {})}
+							>
+								<Icon name={card.icon} size={20} strokeWidth={1.5} class="contact__card-icon" />
+								<span class="contact__card-label">{card.label}</span>
+								<span class="contact__card-value">
+									{card.lines.map((line) => (
+										<span>{line}</span>
+									))}
+								</span>
+								{card.external && <span class="visually-hidden"> (otvara se u novoj kartici)</span>}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+
+		<div class="contact__form-card">
+			<p class="contact__form-title">Pošaljite upit</p>
+			<ContactForm idPrefix="upit" />
+		</div>
+	</div>
+</section>
+
+<style>
+	.contact {
+		/* Full-bleed halves: the colour split is at the screen centre, which is
+		   also the container centre. */
+		background: linear-gradient(
+			to right,
+			var(--color-accent) 50%,
+			var(--color-primary-shade) 50%
+		);
+		padding-block: var(--section-padding-y);
+	}
+
+	/* Deliberately NOT in .container (user decision): each block is centred
+	   in its own colour half. The halves are capped at --contact-half-max
+	   (720px = half of the 1440 design), so on wider screens the blocks stay
+	   as close together as at 1440. Both columns meet at the colour split. */
+	.contact__inner {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, var(--contact-half-max)));
+		justify-content: center;
+		align-items: center;
+	}
+
+	/* Centred in its half, never closer than 48px to the split or the screen
+	   edge (it narrows instead). */
+	.contact__intro,
+	.contact__form-card {
+		justify-self: center;
+		width: min(var(--block-width), 100% - 2 * var(--space-12));
+	}
+
+	.contact__intro {
+		--block-width: var(--contact-intro-width);
+	}
+
+	.contact__form-card {
+		--block-width: var(--contact-card-width);
+	}
+
+	/* ---- Left: Accent half ---- */
+	.contact__intro {
+		color: var(--color-primary);
+		--focus-color: var(--color-primary);
+	}
+
+	.contact__lead {
+		max-width: 440px;
+		margin-top: var(--space-4);
+	}
+
+	.contact__cards {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		margin-top: var(--space-10);
+		border-radius: var(--radius);
+		background-color: var(--color-primary-12);
+		overflow: hidden;
+	}
+
+	/* Hairlines between the 4 cells (as in the reference). */
+	.contact__cards li:nth-child(odd) {
+		border-right: 1px solid var(--color-primary-20);
+	}
+
+	.contact__cards li:nth-child(n + 3) {
+		border-top: 1px solid var(--color-primary-20);
+	}
+
+	.contact__card {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		padding: var(--space-6);
+		transition: background-color var(--duration-fast) ease;
+	}
+
+	.contact__card:hover {
+		background-color: var(--color-primary-12);
+	}
+
+	.contact__card:focus-visible {
+		outline-offset: calc(-1 * var(--space-1));
+	}
+
+	.contact__card-label {
+		margin-top: var(--space-4);
+		font-weight: var(--weight-semibold);
+	}
+
+	.contact__card-value {
+		display: flex;
+		flex-direction: column;
+		margin-top: var(--space-1);
+		font-size: var(--text-small);
+		overflow-wrap: anywhere; /* the email is one long word */
+	}
+
+	/* ---- Right: form card ---- */
+	.contact__form-card {
+		padding: var(--space-8);
+		border-radius: var(--radius);
+		background-color: var(--color-primary);
+		color: var(--color-dark);
+	}
+
+	.contact__form-title {
+		margin-bottom: var(--space-6);
+		font-size: var(--text-lg);
+		line-height: var(--leading-lg);
+		font-weight: var(--weight-semibold);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.contact__card {
+			transition: none;
+		}
+	}
+</style>

@@ -1,8 +1,8 @@
 ---
 /**
  * Base layout for every page (PRD §5): <html lang="hr">, SEO meta, fonts,
- * global styles, skip link, banner, header, <main>, WhatsApp button and the
- * shared reveal-on-scroll script.
+ * global styles, skip link, banner, header, <main>, footer and the shared
+ * reveal-on-scroll script. (The floating WhatsApp button was removed: user decision.)
  *
  * Usage:
  *   <BaseLayout title="…" description="…">
@@ -17,7 +17,7 @@ import '../styles/global.css';
 import { Font, getImage } from 'astro:assets';
 import Banner from '../components/Banner.astro';
 import Header from '../components/Header.astro';
-import WhatsAppButton from '../components/WhatsAppButton.astro';
+import Footer from '../components/Footer.astro';
 import { site } from '../data/site';
 import defaultOgSource from '../assets/hero-van.png';
 
@@ -106,9 +106,7 @@ const jsonLd = {
 			<slot />
 		</main>
 
-		<!-- Footer: designed later from the user's reference (PRD §5). -->
-
-		<WhatsAppButton />
+		<Footer />
 
 		<script>
 			// Shared reveal-on-scroll (PRD §6.2): each [data-reveal] block fades up once.

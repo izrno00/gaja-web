@@ -18,6 +18,11 @@ export const site = {
 		international: '+385992132638',
 	},
 	whatsapp: 'https://wa.me/385992132638',
+	// TODO: replace with the client's real profile URLs (placeholders, user decision).
+	social: {
+		facebook: '#',
+		instagram: '#',
+	},
 	email: 'gajatrans2025@gmail.com',
 	address: {
 		street: addressStreet,
