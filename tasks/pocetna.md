@@ -55,7 +55,8 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - **Positioning (user-approved, don't change without asking):** the `<img>` is laid out as a full-viewport background. It starts 153px above the hero (`top: -var(--site-top-height)`, height = hero + 153px), so the banner and header cover its top part. It uses `object-fit: cover` and **`object-position: right center`**, so the excess is cropped evenly from top and bottom, the van stays fully visible, and the photo keeps the same screen position as when the hero alone filled the viewport.
   - Checked pixel-for-pixel against the user's reference screenshot at 1903×917.
   - **Visible behind the banner and header (user decision):** the hero uses `clip-path: inset(-153px 0 0 0)` instead of `overflow: hidden`. The photo's top 153px therefore paints behind the banner and header, and when they slide away the photo fills their space instead of a blank Primary strip. Sides and bottom are still clipped.
-- Overlay: the PRD gradient built from the `--color-overlay-*` tokens. It also starts 153px above the hero (`inset: -site-top-height 0 0`), so the strip behind the banner and header is darkened like the rest.
+- H1 highlight ("kompletnih selidbi", `.highlight` in `global.css`): Light colour only, **no underline** (user decision, deviates from PRD §4.2 / §9).
+- Overlay: a 90° gradient built from the `--color-overlay-*` tokens, Dark at **85% → 65% → 35%** (left / middle / right; user decision, replacing the PRD/Figma 84% / 78% / 55%). It also starts 153px above the hero (`inset: -site-top-height 0 0`), so the strip behind the banner and header is darkened like the rest.
 - **Pinned "curtain" hero (user decision):** the hero is `position: sticky` and never moves while the page scrolls. Everything after it is wrapped in `<div class="cover">` in `index.astro`, which slides up over the hero and covers it.
   - `top: min(var(--site-top-height), 100svh - var(--hero-min-height))` (with a `100vh` fallback line). On normal screens it pins at 153px, exactly where it sits at scrollY 0, so it doesn't move from the first scroll tick. On screens shorter than 153 + 600px it first scrolls up just enough to show its bottom edge, then pins (at 1440×700 it pins at 100px).
   - Its sticky containing block is `<main>`, so it stays pinned under the **whole page**. Every later section, and the end of `<main>`, slides over it, so it never peeks out again.
@@ -386,7 +387,7 @@ Not committed yet. The user asked to wait with the commit until the whole Počet
   - `--radius-round` is also used for the footer icon circles (round in the reference)
 - **Added for the FAQ:** `--faq-width` (760px), `--duration-accordion` (300ms). `--color-dark-30` is also used for the dotted dividers.
 - **Added for the Galerija carousel:**
-  - `--color-primary-30` (inactive dots on Dark), `--color-overlay-card` (Dark 70%, hover overlay on images)
+  - `--color-primary-50` (inactive dots on Dark; the gallery used an undefined `--color-primary-30` before, which made the dots invisible), `--color-overlay-card` (Dark 70%, hover overlay on images)
   - `--carousel-arrow-size` (52px round arrows), `--dot-size` (8px), `--dot-size-active` (12px)
   - removed in the dark restyle: `--control-size` and `--opacity-disabled` (unused now)
   - `--link-underline` (1px), `--link-underline-hover` (2px), `--link-underline-offset` (6px), used by `TextLink`
